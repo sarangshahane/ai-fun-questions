@@ -1,0 +1,31 @@
+{
+	"name": "ai-fun-questions",
+	"version": "1.0.0",
+	"description": "AI-powered fun tech questions that are generated on demand.",
+	"author": "Sarang Shahane",
+	"license": "GPL-2.0-or-later",
+	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/sarangshahane/ai-fun-questions.git"
+	},
+	"scripts": {
+		"minify": "grunt minify",
+		"rtl": "grunt rtl",
+		"release": "grunt minify && grunt release"
+	},
+	"devDependencies": {
+		"autoprefixer": "^9.8.6",
+		"grunt": "^1.6.1",
+		"grunt-bumpup": "^0.6.3",
+		"grunt-contrib-clean": "^2.0.0",
+		"grunt-contrib-compress": "^2.0.0",
+		"grunt-contrib-copy": "^1.0.0",
+		"grunt-contrib-cssmin": "^5.0.0",
+		"grunt-contrib-uglify": "^5.2.2",
+		"grunt-postcss": "^0.9.0",
+		"grunt-rtlcss": "^2.0.2",
+		"grunt-text-replace": "^0.4.0",
+		"postcss": "^8.3.6"
+	}
+}

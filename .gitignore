@@ -1,0 +1,8 @@
+node_modules/
+package-lock.json
+
+# Build output
+/ai-fun-questions/
+*.zip
+
+.DS_Store

@@ -1,0 +1,122 @@
+[data-ai-fq] {
+	max-width: 640px;
+	margin: 24px auto;
+	font-family: inherit;
+}
+
+.ai-fq__card {
+	padding: 28px;
+	border: 1px solid #e5e7eb;
+	border-radius: 16px;
+	background: #fff;
+	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+.ai-fq__eyebrow {
+	margin-bottom: 10px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: .12em;
+	opacity: .55;
+}
+
+.ai-fq__question {
+	margin-bottom: 20px;
+	font-size: 21px;
+	line-height: 1.45;
+	font-weight: 600;
+}
+
+.ai-fq__label {
+	display: block;
+	margin-bottom: 7px;
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.ai-fq__input {
+	display: block;
+	width: 100%;
+	min-height: 90px;
+	box-sizing: border-box;
+	padding: 12px;
+	border: 1px solid #d1d5db;
+	border-radius: 10px;
+	resize: vertical;
+	font: inherit;
+}
+
+.ai-fq__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 12px;
+}
+
+.ai-fq__button {
+	border: 0;
+	border-radius: 9px;
+	padding: 11px 16px;
+	background: #111827;
+	color: #fff;
+	cursor: pointer;
+	font: inherit;
+	font-weight: 600;
+}
+
+.ai-fq__button--secondary {
+	background: #f3f4f6;
+	color: #111827;
+}
+
+.ai-fq__result {
+	margin-top: 20px;
+	padding: 16px;
+	border-radius: 10px;
+	background: #f8fafc;
+}
+
+.ai-fq__result-label {
+	margin-top: 10px;
+	margin-bottom: 4px;
+	font-size: 12px;
+	font-weight: 700;
+	opacity: .6;
+}
+
+.ai-fq__result-label:first-child {
+	margin-top: 0;
+}
+
+.ai-fq__punchline {
+	font-weight: 700;
+}
+
+.ai-fq__hint {
+	margin-top: 10px;
+	font-size: 12px;
+	opacity: .55;
+}
+
+.ai-fq__loading,
+.ai-fq__error {
+	padding: 12px 0;
+}
+
+.ai-fq__error {
+	color: #b91c1c;
+}
+
+.ai-fq__button--retry {
+	margin-top: 10px;
+}
+
+/*
+ * iOS Safari zooms the page when a focused field is under 16px, and the
+ * textarea inherits the theme font size, which is commonly 14px.
+ */
+@media (max-width: 782px) {
+	.ai-fq__input {
+		font-size: max(16px, 1em);
+	}
+}

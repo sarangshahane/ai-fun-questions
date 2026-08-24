@@ -24,7 +24,7 @@
 	--ai-fq-font-hand: "Bradley Hand", "Segoe Print", "Chalkboard SE", "Comic Sans MS", "Comic Neue", cursive;
 
 	max-width: 1180px;
-	margin-right: 20px;
+	margin-left: 20px;
 	padding: 8px 0 60px;
 	color: var(--ai-fq-text);
 	font-size: 14px;
@@ -120,7 +120,7 @@ body.settings_page_ai-fun-questions #wpbody-content {
 .ai-fq-admin > .error {
 	margin: 0 0 22px;
 	border: 1px solid var(--ai-fq-border);
-	border-left-width: 4px;
+	border-right-width: 4px;
 	border-radius: var(--ai-fq-radius-sm);
 	background: var(--ai-fq-surface);
 	box-shadow: none;
@@ -227,19 +227,19 @@ body.settings_page_ai-fun-questions #wpbody-content {
 	content: "";
 	position: absolute;
 	top: 4px;
-	left: 6px;
+	right: 6px;
 	width: 5px;
 	height: 9px;
 	border: solid #fff;
-	border-width: 0 2px 2px 0;
-	transform: rotate(45deg) scale(0.4);
+	border-width: 0 0 2px 2px;
+	transform: rotate(-45deg) scale(0.4);
 	opacity: 0;
 	transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .ai-fq-provider__input:checked + .ai-fq-provider__card .ai-fq-provider__mark::after {
 	opacity: 1;
-	transform: rotate(45deg) scale(1);
+	transform: rotate(-45deg) scale(1);
 }
 
 .ai-fq-provider__name {
@@ -386,7 +386,7 @@ body.settings_page_ai-fun-questions #wpbody-content {
 
 .ai-fq-notes-list {
 	margin: 0 0 22px;
-	padding-left: 20px;
+	padding-right: 20px;
 	max-width: 88ch;
 	color: var(--ai-fq-text-muted);
 	font-size: 13px;
@@ -422,7 +422,7 @@ body.settings_page_ai-fun-questions #wpbody-content {
 	justify-content: space-between;
 	gap: 16px;
 	margin-top: 34px;
-	padding: 16px 20px 16px 26px;
+	padding: 16px 26px 16px 20px;
 	border: 1px solid var(--ai-fq-border);
 	border-radius: var(--ai-fq-radius);
 	background: var(--ai-fq-surface);
@@ -488,7 +488,7 @@ body.settings_page_ai-fun-questions #wpbody-content {
 
 @media screen and (max-width: 782px) {
 	.ai-fq-admin {
-		margin-right: 12px;
+		margin-left: 12px;
 		padding-bottom: 40px;
 	}
 
