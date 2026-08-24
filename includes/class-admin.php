@@ -1,0 +1,432 @@
+<?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+class AI_FQ_Admin {
+
+	const PAGE_SLUG = 'ai-fun-questions';
+
+	public static function init() {
+		add_action( 'admin_menu', array( __CLASS__, 'add_menu' ) );
+		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
+	}
+
+	public static function add_menu() {
+		add_options_page(
+			__( 'AI Fun Questions', 'ai-fun-questions' ),
+			__( 'AI Fun Questions', 'ai-fun-questions' ),
+			'manage_options',
+			self::PAGE_SLUG,
+			array( __CLASS__, 'render_page' )
+		);
+	}
+
+	/**
+	 * Settings-page assets only. Nothing is loaded on other admin screens.
+	 */
+	public static function enqueue_assets( $hook_suffix ) {
+		if ( 'settings_page_' . self::PAGE_SLUG !== $hook_suffix ) {
+			return;
+		}
+
+		wp_enqueue_style(
+			'ai-fun-questions-admin',
+			AI_FQ_URL . 'assets/css/admin.css',
+			array(),
+			AI_FQ_VERSION
+		);
+
+		wp_enqueue_script(
+			'ai-fun-questions-admin',
+			AI_FQ_URL . 'assets/js/admin.js',
+			array(),
+			AI_FQ_VERSION,
+			true
+		);
+
+		wp_localize_script(
+			'ai-fun-questions-admin',
+			'AI_FQ_ADMIN',
+			array(
+				'i18n' => array(
+					'saved'    => __( 'All changes saved', 'ai-fun-questions' ),
+					'unsaved'  => __( 'Unsaved changes', 'ai-fun-questions' ),
+					'selected' => __( 'Selected', 'ai-fun-questions' ),
+					'inUse'    => __( 'Saved, not in use', 'ai-fun-questions' ),
+				),
+			)
+		);
+	}
+
+	public static function register_settings() {
+		$fields = array(
+			'ai_fq_provider'        => array( __CLASS__, 'sanitize_provider' ),
+			'ai_fq_ollama_url'      => array( __CLASS__, 'sanitize_url_field' ),
+			'ai_fq_ollama_model'    => 'sanitize_text_field',
+			'ai_fq_hf_token'        => array( __CLASS__, 'sanitize_hf_token' ),
+			'ai_fq_hf_model'        => 'sanitize_text_field',
+			'ai_fq_openai_endpoint' => array( __CLASS__, 'sanitize_url_field' ),
+			'ai_fq_openai_key'      => array( __CLASS__, 'sanitize_openai_key' ),
+			'ai_fq_openai_model'    => 'sanitize_text_field',
+		);
+
+		foreach ( $fields as $field => $callback ) {
+			register_setting(
+				'ai_fq_settings',
+				$field,
+				array(
+					'sanitize_callback' => $callback,
+				)
+			);
+		}
+	}
+
+	/**
+	 * Provider metadata used to build the picker and the per-provider panels.
+	 */
+	public static function providers() {
+		return array(
+			'ollama'      => array(
+				'label'    => __( 'Ollama', 'ai-fun-questions' ),
+				'subtitle' => __( 'Local, self-hosted', 'ai-fun-questions' ),
+			),
+			'huggingface' => array(
+				'label'    => __( 'Hugging Face', 'ai-fun-questions' ),
+				'subtitle' => __( 'Inference Providers', 'ai-fun-questions' ),
+			),
+			'openai'      => array(
+				'label'    => __( 'OpenAI-compatible', 'ai-fun-questions' ),
+				'subtitle' => __( 'Any OpenAI-shaped API', 'ai-fun-questions' ),
+			),
+		);
+	}
+
+	public static function sanitize_provider( $value ) {
+		$value = sanitize_text_field( (string) $value );
+
+		return array_key_exists( $value, self::providers() ) ? $value : 'ollama';
+	}
+
+	public static function sanitize_url_field( $value ) {
+		return esc_url_raw( trim( (string) $value ) );
+	}
+
+	public static function sanitize_hf_token( $value ) {
+		return self::sanitize_secret( $value, 'ai_fq_hf_token' );
+	}
+
+	public static function sanitize_openai_key( $value ) {
+		return self::sanitize_secret( $value, 'ai_fq_openai_key' );
+	}
+
+	/**
+	 * Keep the stored secret when the (always blank) input is submitted empty.
+	 *
+	 * A blank field means "leave it alone", so removing a credential needs an
+	 * explicit opt-in: the matching _clear checkbox.
+	 */
+	private static function sanitize_secret( $value, $option ) {
+		$value = sanitize_text_field( (string) $value );
+
+		if ( '' !== trim( $value ) ) {
+			return $value;
+		}
+
+		/*
+		 * options.php has already run check_admin_referer() for this settings
+		 * group before any sanitize callback fires, so the request is verified
+		 * by the time we read the companion checkbox.
+		 */
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( ! empty( $_POST[ $option . '_clear' ] ) ) {
+			return '';
+		}
+
+		return (string) get_option( $option, '' );
+	}
+
+	public static function render_page() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$providers = self::providers();
+		$active    = get_option( 'ai_fq_provider', 'ollama' );
+
+		if ( ! isset( $providers[ $active ] ) ) {
+			$active = 'ollama';
+		}
+		?>
+		<div class="wrap ai-fq-admin">
+			<h1 class="ai-fq-admin__title">
+				<span><?php esc_html_e( 'AI Fun Questions', 'ai-fun-questions' ); ?></span>
+				<span class="ai-fq-pill"><?php esc_html_e( 'POC', 'ai-fun-questions' ); ?></span>
+			</h1>
+
+			<div class="ai-fq-note">
+				<?php self::icon( 'info' ); ?>
+				<p><?php esc_html_e( 'No question bank is stored. Each question is generated on demand and only the current question is temporarily cached for the visitor session.', 'ai-fun-questions' ); ?></p>
+			</div>
+
+			<form method="post" action="options.php" class="ai-fq-form" data-ai-fq-form>
+				<?php settings_fields( 'ai_fq_settings' ); ?>
+
+				<fieldset class="ai-fq-providers">
+					<legend class="ai-fq-providers__legend"><?php esc_html_e( 'AI Provider', 'ai-fun-questions' ); ?></legend>
+
+					<div class="ai-fq-providers__grid">
+						<?php foreach ( $providers as $key => $provider ) : ?>
+							<label class="ai-fq-provider" for="ai-fq-provider-<?php echo esc_attr( $key ); ?>">
+								<input
+									type="radio"
+									class="ai-fq-provider__input"
+									id="ai-fq-provider-<?php echo esc_attr( $key ); ?>"
+									name="ai_fq_provider"
+									value="<?php echo esc_attr( $key ); ?>"
+									data-ai-fq-provider-input
+									<?php checked( $active, $key ); ?>
+								>
+								<span class="ai-fq-provider__card">
+									<span class="ai-fq-provider__top">
+										<span class="ai-fq-provider__icon"><?php self::icon( $key ); ?></span>
+										<span class="ai-fq-provider__mark" aria-hidden="true"></span>
+									</span>
+									<span class="ai-fq-provider__name"><?php echo esc_html( $provider['label'] ); ?></span>
+									<span class="ai-fq-provider__subtitle"><?php echo esc_html( $provider['subtitle'] ); ?></span>
+								</span>
+							</label>
+						<?php endforeach; ?>
+					</div>
+				</fieldset>
+
+				<?php
+				foreach ( $providers as $key => $provider ) {
+					self::render_panel( $key, $provider, $active );
+				}
+				?>
+
+				<div class="ai-fq-card ai-fq-card--notes">
+					<h2 class="ai-fq-card__title"><?php esc_html_e( 'Production notes', 'ai-fun-questions' ); ?></h2>
+					<ul class="ai-fq-notes-list">
+						<li><?php esc_html_e( 'The public widget is intentionally unauthenticated. Rate limiting and short-lived tokens protect the generation/answer flow.', 'ai-fun-questions' ); ?></li>
+						<li><?php esc_html_e( 'AI provider credentials should preferably be defined in wp-config.php for production sites.', 'ai-fun-questions' ); ?></li>
+						<li><?php esc_html_e( 'AI output is validated as plain text and constrained to predefined categories and maximum lengths.', 'ai-fun-questions' ); ?></li>
+					</ul>
+
+					<h2 class="ai-fq-card__title"><?php esc_html_e( 'Frontend usage', 'ai-fun-questions' ); ?></h2>
+					<p class="ai-fq-card__text"><?php esc_html_e( 'Add this shortcode to any page, post, template, or shortcode-enabled area:', 'ai-fun-questions' ); ?></p>
+					<code class="ai-fq-code">[ai_fun_question]</code>
+				</div>
+
+				<div class="ai-fq-savebar">
+					<span class="ai-fq-savebar__status" data-ai-fq-status>
+						<?php esc_html_e( 'All changes saved', 'ai-fun-questions' ); ?>
+					</span>
+					<button type="submit" class="ai-fq-button">
+						<?php esc_html_e( 'Save Changes', 'ai-fun-questions' ); ?>
+					</button>
+				</div>
+			</form>
+		</div>
+		<?php
+	}
+
+	/**
+	 * One configuration panel per provider. The panel matching the saved
+	 * provider is the active one; the others stay editable but are visibly
+	 * parked so it is obvious which credentials are actually in play.
+	 */
+	private static function render_panel( $key, $provider, $active ) {
+		$is_active = ( $key === $active );
+		$classes   = 'ai-fq-panel' . ( $is_active ? ' is-active' : '' );
+		?>
+		<section class="<?php echo esc_attr( $classes ); ?>" data-ai-fq-panel="<?php echo esc_attr( $key ); ?>">
+			<header class="ai-fq-panel__header">
+				<h2 class="ai-fq-panel__title"><?php echo esc_html( $provider['label'] ); ?></h2>
+				<span class="ai-fq-pill ai-fq-pill--state" data-ai-fq-panel-state>
+					<?php
+					echo $is_active
+						? esc_html__( 'Selected', 'ai-fun-questions' )
+						: esc_html__( 'Saved, not in use', 'ai-fun-questions' );
+					?>
+				</span>
+			</header>
+
+			<div class="ai-fq-panel__grid">
+				<?php
+				switch ( $key ) {
+					case 'ollama':
+						self::render_field(
+							array(
+								'name'        => 'ai_fq_ollama_url',
+								'label'       => __( 'Ollama URL', 'ai-fun-questions' ),
+								'type'        => 'url',
+								'value'       => get_option( 'ai_fq_ollama_url', 'http://localhost:11434/api/chat' ),
+								/* translators: %s: default Ollama endpoint URL. */
+								'description' => sprintf( __( 'Default: %s', 'ai-fun-questions' ), 'http://localhost:11434/api/chat' ),
+							)
+						);
+						self::render_field(
+							array(
+								'name'  => 'ai_fq_ollama_model',
+								'label' => __( 'Ollama Model', 'ai-fun-questions' ),
+								'value' => get_option( 'ai_fq_ollama_model', 'gemma3' ),
+							)
+						);
+						break;
+
+					case 'huggingface':
+						self::render_field(
+							array(
+								'name'        => 'ai_fq_hf_token',
+								'label'       => __( 'Hugging Face Token', 'ai-fun-questions' ),
+								'type'        => 'password',
+								'secret'      => true,
+								'constant'    => 'AI_FQ_HF_TOKEN',
+								'stored'      => '' !== (string) get_option( 'ai_fq_hf_token', '' ),
+								'description' => __( 'Leave blank to keep the existing saved token. For production, prefer AI_FQ_HF_TOKEN in wp-config.php.', 'ai-fun-questions' ),
+							)
+						);
+						self::render_field(
+							array(
+								'name'        => 'ai_fq_hf_model',
+								'label'       => __( 'Hugging Face Model', 'ai-fun-questions' ),
+								'value'       => get_option( 'ai_fq_hf_model', 'google/gemma-2-2b-it' ),
+								'description' => __( 'Use a chat-completion model available through Hugging Face Inference Providers.', 'ai-fun-questions' ),
+							)
+						);
+						break;
+
+					case 'openai':
+						self::render_field(
+							array(
+								'name'  => 'ai_fq_openai_endpoint',
+								'label' => __( 'OpenAI-compatible Endpoint', 'ai-fun-questions' ),
+								'type'  => 'url',
+								'value' => get_option( 'ai_fq_openai_endpoint', 'https://api.openai.com/v1/chat/completions' ),
+								'full'  => true,
+							)
+						);
+						self::render_field(
+							array(
+								'name'        => 'ai_fq_openai_key',
+								'label'       => __( 'OpenAI-compatible API Key', 'ai-fun-questions' ),
+								'type'        => 'password',
+								'secret'      => true,
+								'constant'    => 'AI_FQ_OPENAI_KEY',
+								'stored'      => '' !== (string) get_option( 'ai_fq_openai_key', '' ),
+								'description' => __( 'Leave blank to keep the existing saved key. For production, prefer AI_FQ_OPENAI_KEY in wp-config.php.', 'ai-fun-questions' ),
+							)
+						);
+						self::render_field(
+							array(
+								'name'  => 'ai_fq_openai_model',
+								'label' => __( 'OpenAI-compatible Model', 'ai-fun-questions' ),
+								'value' => get_option( 'ai_fq_openai_model', 'gpt-4o-mini' ),
+							)
+						);
+						break;
+				}
+				?>
+			</div>
+		</section>
+		<?php
+	}
+
+	/**
+	 * Secret fields never render their stored value; a placeholder only signals
+	 * that something is saved.
+	 */
+	private static function render_field( $args ) {
+		$args = wp_parse_args(
+			$args,
+			array(
+				'name'        => '',
+				'label'       => '',
+				'type'        => 'text',
+				'value'       => '',
+				'description' => '',
+				'secret'      => false,
+				'constant'    => '',
+				'stored'      => false,
+				'full'        => false,
+			)
+		);
+
+		$id            = 'ai-fq-field-' . $args['name'];
+		$from_constant = '' !== $args['constant'] && defined( $args['constant'] );
+		$classes       = 'ai-fq-field' . ( $args['full'] ? ' ai-fq-field--full' : '' );
+
+		$description = $args['description'];
+
+		if ( $args['secret'] && $from_constant ) {
+			$description = sprintf(
+				/* translators: %s: PHP constant name. */
+				__( 'Defined via %s in wp-config.php. The field below is ignored.', 'ai-fun-questions' ),
+				$args['constant']
+			);
+		}
+		?>
+		<div class="<?php echo esc_attr( $classes ); ?>">
+			<label class="ai-fq-field__label" for="<?php echo esc_attr( $id ); ?>">
+				<?php echo esc_html( $args['label'] ); ?>
+				<?php if ( $from_constant ) : ?>
+					<span class="ai-fq-pill ai-fq-pill--tiny"><?php esc_html_e( 'wp-config', 'ai-fun-questions' ); ?></span>
+				<?php endif; ?>
+			</label>
+
+			<input
+				class="ai-fq-field__input"
+				type="<?php echo esc_attr( $args['type'] ); ?>"
+				id="<?php echo esc_attr( $id ); ?>"
+				name="<?php echo esc_attr( $args['name'] ); ?>"
+				value="<?php echo $args['secret'] ? '' : esc_attr( $args['value'] ); ?>"
+				<?php if ( $args['secret'] ) : ?>
+					autocomplete="new-password"
+					placeholder="<?php echo esc_attr( $args['stored'] ? str_repeat( "\xe2\x80\xa2", 12 ) : '' ); ?>"
+				<?php endif; ?>
+			>
+
+			<?php if ( $args['secret'] && $args['stored'] ) : ?>
+				<label class="ai-fq-field__clear">
+					<input
+						type="checkbox"
+						name="<?php echo esc_attr( $args['name'] ); ?>_clear"
+						value="1"
+						data-ai-fq-clear="<?php echo esc_attr( $id ); ?>"
+					>
+					<span><?php esc_html_e( 'Clear the saved value', 'ai-fun-questions' ); ?></span>
+				</label>
+			<?php endif; ?>
+
+			<?php if ( '' !== $description ) : ?>
+				<p class="ai-fq-field__description"><?php echo esc_html( $description ); ?></p>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Inline SVG so the page needs no icon font or image requests.
+	 */
+	private static function icon( $name ) {
+		$icons = array(
+			'info'        => '<circle cx="12" cy="12" r="9"/><path d="M12 11.2v4.6"/><circle cx="12" cy="8.1" r="1" fill="currentColor" stroke="none"/>',
+			'ollama'      => '<rect x="3" y="7" width="18" height="11" rx="4.5"/><circle cx="9" cy="12.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="15" cy="12.5" r="1.5" fill="currentColor" stroke="none"/>',
+			'huggingface' => '<circle cx="12" cy="12" r="9"/><path d="M8.4 14.2c.9 1.3 2.1 1.9 3.6 1.9s2.7-.6 3.6-1.9"/><circle cx="9.3" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="14.7" cy="10" r="1" fill="currentColor" stroke="none"/>',
+			'openai'      => '<path d="M12 2.9 20 7.45v9.1L12 21.1 4 16.55v-9.1z"/><circle cx="12" cy="12" r="3.1"/>',
+		);
+
+		if ( ! isset( $icons[ $name ] ) ) {
+			return;
+		}
+
+		printf(
+			'<svg class="ai-fq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">%s</svg>',
+			$icons[ $name ] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Hard-coded SVG paths.
+		);
+	}
+}
