@@ -14,14 +14,16 @@ class AI_FQ_Frontend {
 	public static function register_assets() {
 		wp_register_style(
 			'ai-fun-questions',
-			AI_FQ_URL . 'assets/css/frontend.css',
+			AI_FQ_Plugin::style_url( 'frontend' ),
 			array(),
 			AI_FQ_VERSION
 		);
 
+		AI_FQ_Plugin::add_rtl( 'ai-fun-questions' );
+
 		wp_register_script(
 			'ai-fun-questions',
-			AI_FQ_URL . 'assets/js/frontend.js',
+			AI_FQ_Plugin::script_url( 'frontend' ),
 			array(),
 			AI_FQ_VERSION,
 			true

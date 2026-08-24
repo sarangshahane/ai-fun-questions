@@ -34,14 +34,16 @@ class AI_FQ_Admin {
 
 		wp_enqueue_style(
 			'ai-fun-questions-admin',
-			AI_FQ_URL . 'assets/css/admin.css',
+			AI_FQ_Plugin::style_url( 'admin' ),
 			array(),
 			AI_FQ_VERSION
 		);
 
+		AI_FQ_Plugin::add_rtl( 'ai-fun-questions-admin' );
+
 		wp_enqueue_script(
 			'ai-fun-questions-admin',
-			AI_FQ_URL . 'assets/js/admin.js',
+			AI_FQ_Plugin::script_url( 'admin' ),
 			array(),
 			AI_FQ_VERSION,
 			true
