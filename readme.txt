@@ -4,7 +4,7 @@ Tags: ai, jokes, openai, ollama, shortcode
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 0.3.1
+Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -104,8 +104,10 @@ No. Answers are not persisted. Questions are held only in a short-lived transien
 
 == Changelog ==
 
-= 0.3.1 =
+= 1.0.0 =
+* First stable release.
 * Added an explicit "Clear the saved value" option for stored provider credentials.
+* Added GPLv2 license and complete plugin metadata.
 * Documented setup, configuration, and troubleshooting.
 
 = 0.3.0 =
@@ -128,5 +130,5 @@ No. Answers are not persisted. Questions are held only in a short-lived transien
 
 == Upgrade Notice ==
 
-= 0.2.1 =
-Important fixes: rate limiting previously never triggered, and saving settings could wipe stored API credentials.
+= 1.0.0 =
+First stable release. Includes important earlier fixes: rate limiting previously never triggered, and saving settings could wipe stored API credentials.

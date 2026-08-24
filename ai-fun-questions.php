@@ -3,7 +3,7 @@
  * Plugin Name: AI Fun Questions
  * Plugin URI:  https://github.com/sarangshahane/ai-fun-questions
  * Description: AI-powered fun tech questions that are generated on demand.
- * Version:     0.3.1
+ * Version:     1.0.0
  * Author:      Sarang Shahane
  * Author URI:  https://github.com/sarangshahane
  * Requires at least: 6.4
@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'AI_FQ_VERSION', '0.3.1' );
+define( 'AI_FQ_VERSION', '1.0.0' );
 define( 'AI_FQ_FILE', __FILE__ );
 define( 'AI_FQ_DIR', plugin_dir_path( __FILE__ ) );
 define( 'AI_FQ_URL', plugin_dir_url( __FILE__ ) );
