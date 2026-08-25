@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+  <style>
+    body {
+      margin: 0;
+      background: #FBFAF8;
+      color: #111827;
+      font-family: "Public Sans", "Helvetica Neue", Helvetica, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: #B4741B; text-decoration: none; }
+    a:hover { color: #8A570F; }
+    .dsp { font-family: "Bricolage Grotesque", "Helvetica Neue", Helvetica, sans-serif; letter-spacing: -0.02em; }
+    .mono { font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+  </style>
+</helmet>
+
+<div style="width: 100%;">
+
+  <!-- nav -->
+  <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 20px 0 20px;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3a9 9 0 0 0-9 9c0 2.2.8 4.2 2.1 5.7L4 21l3.6-1.2A9 9 0 1 0 12 3Z"></path>
+        <path d="M9.2 9.6a2.8 2.8 0 0 1 5.5.8c0 1.9-2.7 2.3-2.7 4"></path>
+      </svg>
+      <span class="dsp" style="font-size: 15px; font-weight: 800;">AI Fun Questions</span>
+    </div>
+    <span style="background: #111827; color: #fff; font-size: 14px; font-weight: 600; padding: 0 18px; border-radius: 9px; min-height: 44px; display: inline-flex; align-items: center;">Get it</span>
+  </div>
+
+  <!-- hero -->
+  <div style="display: flex; flex-direction: column; gap: 18px; padding: 40px 20px 0 20px;">
+    <span class="eyebrow" style="background: #FBEFD9; color: #8A570F; padding: 6px 10px; border-radius: 999px; align-self: flex-start;">WordPress plugin</span>
+    <h1 class="dsp" style="margin: 0; font-size: 40px; line-height: 1.0; font-weight: 800; text-wrap: pretty;">Nobody has heard this joke before.</h1>
+    <p style="margin: 0; font-size: 16px; line-height: 1.55; color: #4B5563;">
+      A tiny widget that asks an AI for one fresh tech riddle, right when a visitor wants
+      one. No joke database to run dry.
+    </p>
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <span style="background: #111827; color: #fff; font-size: 15px; font-weight: 600; padding: 15px 22px; border-radius: 10px; text-align: center;">Add it to your site</span>
+      <span style="background: #F3F4F6; color: #111827; font-size: 15px; font-weight: 600; padding: 15px 22px; border-radius: 10px; text-align: center;">Try it right here</span>
+    </div>
+  </div>
+
+  <!-- widget -->
+  <div style="padding: 34px 20px 0 20px;">
+    <div style="padding: 22px; border: 1px solid #e5e7eb; border-radius: 16px; background: #fff; box-shadow: 0 8px 30px rgba(0,0,0,0.06); display: flex; flex-direction: column; gap: 14px;">
+      <span class="eyebrow" style="color: #6B7280;">AI fun question</span>
+      <p style="margin: 0; font-size: 19px; font-weight: 600; line-height: 1.35;">Why did the CSS file refuse to argue with the HTML?</p>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <span style="font-size: 13px; font-weight: 600; color: #374151;">Your answer</span>
+        <div style="padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; color: #9CA3AF; font-size: 16px; min-height: 44px; box-sizing: border-box;">What do you think?</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="background: #111827; color: #fff; border-radius: 9px; padding: 13px 16px; font-size: 15px; font-weight: 600; min-height: 44px; box-sizing: border-box; display: flex; align-items: center;">Submit Answer</span>
+        <span style="background: #f3f4f6; color: #111827; border-radius: 9px; padding: 13px 16px; font-size: 15px; font-weight: 600; min-height: 44px; box-sizing: border-box; display: flex; align-items: center;">Next</span>
+      </div>
+      <span style="font-size: 13px; color: #6B7280;">Hint: think about who wins a specificity fight.</span>
+    </div>
+  </div>
+
+  <!-- shortcode -->
+  <div style="padding: 34px 20px 0 20px;">
+    <div style="background: #111827; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 12px;">
+      <span class="eyebrow" style="color: #E4922B;">Paste this anywhere</span>
+      <div class="mono" style="background: #1F2937; border: 1px solid #374151; border-radius: 10px; padding: 14px; font-size: 15px; font-weight: 700; color: #FBEFD9; text-align: center;">[ai_fun_question]</div>
+      <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #9CA3AF;">Posts, pages, blocks, widget areas, page builders. That is the whole integration.</p>
+    </div>
+  </div>
+
+  <!-- how it works, stacked -->
+  <div style="padding: 44px 20px 0 20px; display: flex; flex-direction: column; gap: 14px;">
+    <span class="eyebrow" style="color: #B4741B;">How it works</span>
+    <h2 class="dsp" style="margin: 0 0 8px 0; font-size: 30px; line-height: 1.06; font-weight: 800;">Four steps, and the punchline never leaves early.</h2>
+
+    <div style="display: flex; gap: 14px; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px;">
+      <span class="mono" style="font-size: 12px; font-weight: 700; color: #E4922B;">01</span>
+      <div style="display: flex; flex-direction: column; gap: 5px;">
+        <span class="dsp" style="font-size: 16px; font-weight: 800;">A visitor lands</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #6B7280;">The widget asks your site for one question. No login.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 14px; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px;">
+      <span class="mono" style="font-size: 12px; font-weight: 700; color: #E4922B;">02</span>
+      <div style="display: flex; flex-direction: column; gap: 5px;">
+        <span class="dsp" style="font-size: 16px; font-weight: 800;">WordPress asks the AI</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #6B7280;">Your server calls the provider. The browser never sees the key.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 14px; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px;">
+      <span class="mono" style="font-size: 12px; font-weight: 700; color: #E4922B;">03</span>
+      <div style="display: flex; flex-direction: column; gap: 5px;">
+        <span class="dsp" style="font-size: 16px; font-weight: 800;">The question appears</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #6B7280;">The punchline stays behind, in a ten-minute transient.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 14px; background: #111827; border-radius: 14px; padding: 18px;">
+      <span class="mono" style="font-size: 12px; font-weight: 700; color: #E4922B;">04</span>
+      <div style="display: flex; flex-direction: column; gap: 5px;">
+        <span class="dsp" style="font-size: 16px; font-weight: 800; color: #fff;">They answer, you reveal</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #9CA3AF;">Released once over POST, then discarded.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- cta -->
+  <div style="padding: 40px 20px 40px 20px;">
+    <div style="border-radius: 20px; background: #E4922B; padding: 34px 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center;">
+      <h2 class="dsp" style="margin: 0; font-size: 30px; line-height: 1.05; font-weight: 800; color: #23160A;">Give them something to smile at.</h2>
+      <p style="margin: 0; font-size: 15px; line-height: 1.5; color: #5C3A0C;">Free and GPL-2.0-or-later.</p>
+      <span style="background: #111827; color: #fff; font-size: 15px; font-weight: 600; padding: 15px 26px; border-radius: 10px;">Download the plugin</span>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

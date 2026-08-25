@@ -62,6 +62,22 @@ class AI_FQ_REST_API {
 		 */
 		$bucket = 'generate|' . self::client_hash();
 
+		/*
+		 * Charge the per-IP ceiling first. The bucket above mixes in the
+		 * User-Agent, so a caller rotating that header alone would otherwise
+		 * mint a fresh quota and an unbounded provider bill from one address.
+		 */
+		if ( ! AI_FQ_Rate_Limiter::allow( 'generate-ip|' . self::ip_hash(), AI_FQ_Rate_Limiter::IP_LIMIT ) ) {
+			return new WP_Error(
+				'ai_fq_rate_limited',
+				__( 'Please wait before requesting another question.', 'ai-fun-questions' ),
+				array(
+					'status'      => 429,
+					'retry_after' => AI_FQ_Rate_Limiter::WINDOW,
+				)
+			);
+		}
+
 		if ( ! AI_FQ_Rate_Limiter::allow( $bucket ) ) {
 			return new WP_Error(
 				'ai_fq_rate_limited',
@@ -210,8 +226,36 @@ class AI_FQ_REST_API {
 		return 'ai_fq_question_' . hash( 'sha256', $token );
 	}
 
-	private static function client_hash() {
+	/**
+	 * Address the request is attributed to.
+	 *
+	 * REMOTE_ADDR only. Behind a reverse proxy or CDN that is the proxy, which
+	 * collapses every visitor into one bucket, but forwarded headers are
+	 * caller-supplied and trusting them by default would be worse than the
+	 * collapse. A site that terminates its own proxy can supply the real
+	 * address through the filter.
+	 *
+	 * @return string
+	 */
+	private static function client_ip() {
 		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
+
+		$ip = (string) apply_filters( 'ai_fq_client_ip', $ip );
+
+		return '' !== trim( $ip ) ? $ip : 'unknown';
+	}
+
+	/**
+	 * Per-IP identity, used for the ceiling the User-Agent cannot rotate away.
+	 *
+	 * @return string
+	 */
+	private static function ip_hash() {
+		return hash_hmac( 'sha256', self::client_ip(), wp_salt( 'auth' ) );
+	}
+
+	private static function client_hash() {
+		$ip = self::client_ip();
 		$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : 'unknown';
 
 		return hash_hmac( 'sha256', $ip . '|' . $ua, wp_salt( 'auth' ) );

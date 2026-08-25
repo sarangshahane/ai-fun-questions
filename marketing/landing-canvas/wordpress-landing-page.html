@@ -1,0 +1,249 @@
+<!--
+  AI Fun Questions — landing page content for WordPress.
+
+  HOW TO USE
+  1. Pages > Add New.
+  2. Add a "Custom HTML" block (or switch the editor to Code editor) and paste
+     everything below the marker.
+  3. Publish. The [ai_fun_question] shortcode in the demo section renders the
+     real widget, so the page demos the live plugin.
+
+  IMPORTANT: a Custom HTML block does NOT run shortcodes on its own.
+
+  Recommended: delete the [ai_fun_question] lines from the HTML block and put
+  each one in its own Shortcode block, positioned where the line was. Nothing
+  else on the site is affected.
+
+  Advanced fallback, with a side effect worth knowing: the filter below makes
+  EVERY Custom HTML block on the whole site run shortcodes, not just this page.
+  Only use it if that is what you want.
+      add_filter( 'render_block', function ( $html, $block ) {
+          return 'core/html' === $block['blockName'] ? do_shortcode( $html ) : $html;
+      }, 10, 2 );
+
+  Two kinds of shortcode appear below, and the difference matters:
+    [ai_fun_question]    -> the ONE live widget, in the demo section. Renders.
+    [[ai_fun_question]]  -> shown to the reader as text in the code boxes.
+                            The doubled brackets are how WordPress escapes a
+                            shortcode; it prints as [ai_fun_question]. Do not
+                            "correct" these to single brackets or the code
+                            boxes will sprout extra widgets and extra API calls.
+
+  Fill in before publishing: [YOUR DOWNLOAD URL], [YOUR DOCS URL].
+-->
+
+<div class="aifq-lp">
+
+  <style>
+    /* The design uses these three faces. Better: enqueue them from the theme
+       instead (see the note at the top of this file) — an @import here is
+       render-blocking. Delete this line if you enqueue properly. */
+    @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
+
+    .aifq-lp { --ink: #111827; --muted: #6B7280; --line: #e5e7eb; --bg: #FBFAF8; --accent: #E4922B; --tint: #FBEFD9; }
+    .aifq-lp { background: var(--bg); color: var(--ink); font-family: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif; }
+    .aifq-lp * { box-sizing: border-box; }
+    .aifq-wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+    .aifq-dsp { font-family: "Bricolage Grotesque", "Public Sans", Helvetica, sans-serif; letter-spacing: -0.02em; font-weight: 800; }
+    .aifq-mono { font-family: "JetBrains Mono", ui-monospace, Menlo, monospace; }
+    .aifq-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+    .aifq-btn { display: inline-block; background: var(--ink); color: #fff; font-size: 15px; font-weight: 600; padding: 15px 26px; border-radius: 10px; text-decoration: none; }
+    .aifq-btn:hover { background: #000; color: #fff; }
+    .aifq-btn-2 { display: inline-block; background: #F3F4F6; color: var(--ink); font-size: 15px; font-weight: 600; padding: 15px 22px; border-radius: 10px; text-decoration: none; }
+    .aifq-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 56px; align-items: center; }
+    .aifq-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+    .aifq-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 26px; }
+    .aifq-h2 { font-size: 44px; line-height: 1.05; margin: 0; }
+    .aifq-sec { padding-top: 100px; }
+    @media (max-width: 860px) {
+      .aifq-grid-2, .aifq-grid-3 { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+      .aifq-h2 { font-size: 32px; }
+      .aifq-sec { padding-top: 64px; }
+    }
+  </style>
+
+  <!-- HERO -->
+  <div class="aifq-wrap" style="padding-top: 64px;">
+    <div class="aifq-grid-2">
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        <span class="aifq-eyebrow" style="background: var(--tint); color: #8A570F; padding: 6px 11px; border-radius: 999px; align-self: flex-start;">WordPress plugin</span>
+        <h1 class="aifq-dsp" style="margin: 0; font-size: 60px; line-height: 1.0;">Nobody has heard this joke before.</h1>
+        <p style="margin: 0; font-size: 18px; line-height: 1.6; color: #4B5563;">
+          A tiny widget that asks an AI for one fresh tech riddle, right when a visitor wants one.
+          There is no joke database to run dry &mdash; every question is written on the spot,
+          held for ten minutes, then thrown away.
+        </p>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <a class="aifq-btn" href="[YOUR DOWNLOAD URL]">Add it to your site</a>
+          <a class="aifq-btn-2" href="#aifq-demo">Try the live one</a>
+        </div>
+        <div style="display: flex; gap: 18px; flex-wrap: wrap; color: var(--muted);">
+          <span class="aifq-mono" style="font-size: 12px;">3 AI providers</span>
+          <span class="aifq-mono" style="font-size: 12px;">0 questions stored</span>
+          <span class="aifq-mono" style="font-size: 12px;">GPL-2.0-or-later</span>
+        </div>
+      </div>
+
+      <!-- Hero: a STATIC picture of the widget, deliberately not a live one.
+           Every live [ai_fun_question] on the page costs one provider call per
+           page view, so the page ships with exactly one, further down in the
+           demo section. If you would rather have the live widget up here, swap
+           this block for [ai_fun_question] and make the demo one static. -->
+      <div style="padding: 28px; border: 1px solid var(--line); border-radius: 16px; background: #fff; box-shadow: 0 8px 30px rgba(0,0,0,0.06); display: flex; flex-direction: column; gap: 16px;">
+        <span class="aifq-eyebrow" style="color: var(--muted);">AI fun question</span>
+        <p style="margin: 0; font-size: 21px; font-weight: 600; line-height: 1.35;">Why did the developer go broke after the holidays?</p>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <span style="font-size: 13px; font-weight: 600; color: #374151;">Your answer</span>
+          <div style="padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; color: #6B7280; font-size: 15px;">He spent every last byte&hellip;</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="background: var(--ink); color: #fff; border-radius: 9px; padding: 11px 16px; font-size: 15px; font-weight: 600;">Submit Answer</span>
+          <span style="background: #f3f4f6; color: var(--ink); border-radius: 9px; padding: 11px 16px; font-size: 15px; font-weight: 600;">Next Question</span>
+        </div>
+        <div style="background: #f8fafc; border-radius: 10px; padding: 16px;">
+          <span class="aifq-eyebrow" style="color: var(--muted);">The AI punchline</span>
+          <div style="font-size: 15px; font-weight: 600; margin-top: 6px;">He lost his cache.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMO -->
+  <div class="aifq-wrap aifq-sec" id="aifq-demo">
+    <div style="background: var(--ink); border-radius: 24px; padding: 48px;">
+      <div class="aifq-grid-2">
+        <div style="display: flex; flex-direction: column; gap: 18px;">
+          <span class="aifq-eyebrow" style="color: var(--accent);">Try the widget</span>
+          <h2 class="aifq-dsp aifq-h2" style="color: #fff;">Have a go. Then put it on your own page.</h2>
+          <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #9CA3AF;">
+            Answer the riddle and the server hands back the punchline. On your site this is
+            one shortcode, and it behaves exactly like this.
+          </p>
+          <div class="aifq-mono" style="background: #1F2937; border: 1px solid #374151; border-radius: 10px; padding: 15px 18px; font-size: 15px; font-weight: 700; color: var(--tint); display: inline-block;">
+            [[ai_fun_question]]
+          </div>
+        </div>
+        <div>
+          [ai_fun_question]
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="aifq-wrap aifq-sec">
+    <span class="aifq-eyebrow" style="color: #B4741B;">How it works</span>
+    <h2 class="aifq-dsp aifq-h2" style="margin-top: 12px; max-width: 18em;">Four steps, and the punchline never leaves the server early.</h2>
+
+    <div class="aifq-grid-3" style="padding-top: 36px;">
+      <div class="aifq-card">
+        <span class="aifq-mono" style="font-size: 12px; font-weight: 700; color: var(--accent);">01</span>
+        <h3 class="aifq-dsp" style="margin: 10px 0 8px; font-size: 19px;">A visitor lands</h3>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: var(--muted);">The widget renders and asks your site for one question. No account, no cookie, no login.</p>
+      </div>
+      <div class="aifq-card">
+        <span class="aifq-mono" style="font-size: 12px; font-weight: 700; color: var(--accent);">02</span>
+        <h3 class="aifq-dsp" style="margin: 10px 0 8px; font-size: 19px;">WordPress asks the AI</h3>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: var(--muted);">Your server calls the provider you configured, with your key. The browser never sees it.</p>
+      </div>
+      <div class="aifq-card">
+        <span class="aifq-mono" style="font-size: 12px; font-weight: 700; color: var(--accent);">03</span>
+        <h3 class="aifq-dsp" style="margin: 10px 0 8px; font-size: 19px;">The question appears</h3>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: var(--muted);">Question and hint go to the browser. The punchline stays behind, in a ten-minute transient.</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 20px; background: var(--ink); border-radius: 16px; padding: 26px;">
+      <span class="aifq-mono" style="font-size: 12px; font-weight: 700; color: var(--accent);">04</span>
+      <h3 class="aifq-dsp" style="margin: 10px 0 8px; font-size: 19px; color: #fff;">They answer, you reveal</h3>
+      <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #9CA3AF;">The answer is posted back, the punchline is released once, and the question is discarded.</p>
+    </div>
+
+    <div style="margin-top: 20px; background: var(--tint); border-radius: 16px; padding: 24px 26px;">
+      <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #6B4310;">
+        <strong style="color: #4A2E08;">Why that matters:</strong> the punchline is never sent with the question, and it is only
+        released over POST, once per question. Provider keys stay server-side, AI output is sanitised before it is stored,
+        and requests are rate limited per visitor and per IP.
+      </p>
+    </div>
+  </div>
+
+  <!-- PURPOSE -->
+  <div class="aifq-wrap aifq-sec">
+    <div class="aifq-grid-2" style="align-items: start;">
+      <div>
+        <span class="aifq-eyebrow" style="color: #B4741B;">What it is for</span>
+        <h2 class="aifq-dsp aifq-h2" style="margin-top: 12px;">A small reason to stay a few seconds longer.</h2>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 18px;">
+        <p style="margin: 0; font-size: 17px; line-height: 1.65; color: #374151;">
+          Most &ldquo;fun&rdquo; widgets ship a hundred jokes in an array. Visitors see the same one twice and stop looking.
+          This plugin has no bank to exhaust: it asks a model for something new each time, so the tenth visit is as
+          fresh as the first.
+        </p>
+        <p style="margin: 0; font-size: 17px; line-height: 1.65; color: #374151;">
+          It is deliberately small. One shortcode, one settings screen, no tracking, no accounts, nothing stored
+          about the person answering.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHERE -->
+  <div class="aifq-wrap aifq-sec">
+    <span class="aifq-eyebrow" style="color: #B4741B;">Where to put it</span>
+    <h2 class="aifq-dsp aifq-h2" style="margin-top: 12px;">Anywhere a page goes quiet.</h2>
+    <div class="aifq-grid-3" style="padding-top: 36px;">
+      <div class="aifq-card"><h3 class="aifq-dsp" style="margin: 0 0 8px; font-size: 18px;">The 404 page</h3><p style="margin: 0; font-size: 14px; line-height: 1.55; color: var(--muted);">Someone hit a dead link. Give them a riddle instead of an apology and a search box.</p></div>
+      <div class="aifq-card"><h3 class="aifq-dsp" style="margin: 0 0 8px; font-size: 18px;">A booth screen</h3><p style="margin: 0; font-size: 14px; line-height: 1.55; color: var(--muted);">WordCamp, a meetup, a careers fair. A laptop on a stand and something to talk about.</p></div>
+      <div class="aifq-card"><h3 class="aifq-dsp" style="margin: 0 0 8px; font-size: 18px;">A blog sidebar</h3><p style="margin: 0; font-size: 14px; line-height: 1.55; color: var(--muted);">A recurring bit of personality on a long-form tech blog, without another content chore.</p></div>
+      <div class="aifq-card"><h3 class="aifq-dsp" style="margin: 0 0 8px; font-size: 18px;">An intranet break page</h3><p style="margin: 0; font-size: 14px; line-height: 1.55; color: var(--muted);">Self-host the model with Ollama and nothing leaves the building.</p></div>
+      <div class="aifq-card"><h3 class="aifq-dsp" style="margin: 0 0 8px; font-size: 18px;">A thank-you page</h3><p style="margin: 0; font-size: 14px; line-height: 1.55; color: var(--muted);">After a signup or a purchase, when the work is done and the mood is good.</p></div>
+      <div class="aifq-card"><h3 class="aifq-dsp" style="margin: 0 0 8px; font-size: 18px;">A coming-soon page</h3><p style="margin: 0; font-size: 14px; line-height: 1.55; color: var(--muted);">Something to do while the real site is being built, other than leaving.</p></div>
+    </div>
+  </div>
+
+  <!-- WHO -->
+  <div class="aifq-wrap aifq-sec">
+    <span class="aifq-eyebrow" style="color: #B4741B;">Who it is for</span>
+    <h2 class="aifq-dsp aifq-h2" style="margin-top: 12px;">If you can add a shortcode, you can run it.</h2>
+    <div class="aifq-grid-3" style="padding-top: 36px;">
+      <div class="aifq-card"><h3 class="aifq-dsp" style="margin: 0 0 8px; font-size: 20px;">Site owners &amp; bloggers</h3><p style="margin: 0; font-size: 15px; line-height: 1.6; color: var(--muted);">No code. Install, choose a provider, paste the shortcode.</p></div>
+      <div class="aifq-card"><h3 class="aifq-dsp" style="margin: 0 0 8px; font-size: 20px;">Agencies &amp; freelancers</h3><p style="margin: 0; font-size: 15px; line-height: 1.6; color: var(--muted);">Keys live in <span class="aifq-mono" style="font-size: 13px;">wp-config.php</span>, so they never sit in a database you hand over.</p></div>
+      <div class="aifq-card"><h3 class="aifq-dsp" style="margin: 0 0 8px; font-size: 20px;">Developers</h3><p style="margin: 0; font-size: 15px; line-height: 1.6; color: var(--muted);">A provider interface to implement, filters for rate limits and client IP, and a self-hosted path through Ollama.</p></div>
+    </div>
+  </div>
+
+  <!-- SETUP -->
+  <div class="aifq-wrap aifq-sec">
+    <span class="aifq-eyebrow" style="color: #B4741B;">How to use it</span>
+    <h2 class="aifq-dsp aifq-h2" style="margin-top: 12px;">Three steps, start to finish.</h2>
+    <div class="aifq-grid-3" style="padding-top: 36px;">
+      <div class="aifq-card">
+        <h3 class="aifq-dsp" style="margin: 0 0 8px; font-size: 20px;">1. Install and activate</h3>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: var(--muted);">Upload the plugin and activate it. It creates one small table for rate limiting and nothing else.</p>
+      </div>
+      <div class="aifq-card">
+        <h3 class="aifq-dsp" style="margin: 0 0 8px; font-size: 20px;">2. Point it at a model</h3>
+        <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.6; color: var(--muted);">Open <strong>Settings &rsaquo; AI Fun Questions</strong>, pick a provider and paste a key &mdash; or keep it out of the database:</p>
+        <div class="aifq-mono" style="background: #F8FAFC; border: 1px solid var(--line); border-radius: 10px; padding: 14px; font-size: 12.5px; line-height: 1.7; color: #374151; overflow-x: auto;">define( 'AI_FQ_OPENAI_KEY', 'sk-&hellip;' );</div>
+      </div>
+      <div class="aifq-card">
+        <h3 class="aifq-dsp" style="margin: 0 0 8px; font-size: 20px;">3. Drop in the shortcode</h3>
+        <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.6; color: var(--muted);">Paste it into any post, page, block or widget area.</p>
+        <div class="aifq-mono" style="background: var(--ink); border-radius: 10px; padding: 14px 16px; font-size: 14px; font-weight: 700; color: var(--tint);">[[ai_fun_question]]</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="aifq-wrap aifq-sec" style="padding-bottom: 80px;">
+    <div style="border-radius: 24px; background: var(--accent); padding: 60px 40px; text-align: center;">
+      <h2 class="aifq-dsp" style="margin: 0 auto; font-size: 46px; line-height: 1.05; color: #23160A; max-width: 16em;">Go on. Give them something to smile at.</h2>
+      <p style="margin: 16px auto 24px; font-size: 17px; line-height: 1.55; color: #5C3A0C; max-width: 30em;">Free and GPL-2.0-or-later. Bring your own model, or run one on your own hardware.</p>
+      <a class="aifq-btn" href="[YOUR DOWNLOAD URL]">Download the plugin</a>
+      <a class="aifq-btn-2" href="[YOUR DOCS URL]" style="margin-left: 8px;">Read the docs</a>
+    </div>
+  </div>
+
+</div>

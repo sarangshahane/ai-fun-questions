@@ -6,3 +6,7 @@ package-lock.json
 *.zip
 
 .DS_Store
+
+# Engineering context for AI tooling — local only, never pushed
+/.claude/
+/.codedna/

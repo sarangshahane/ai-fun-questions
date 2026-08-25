@@ -62,8 +62,13 @@ module.exports = function ( grunt ) {
 					'!*.map',
 					'!docs/**',
 					'!readme.md',
-					'!claude.md',
-					'!architecture.md',
+					'!marketing/**',
+					// Engineering context, not shipped. Globbing is case-sensitive
+					// here, so these must match the real filenames on disk.
+					'!**/CLAUDE.md',
+					'!**/architecture.md',
+					'!.claude/**',
+					'!.codedna/**',
 				],
 				dest: 'ai-fun-questions/',
 			},

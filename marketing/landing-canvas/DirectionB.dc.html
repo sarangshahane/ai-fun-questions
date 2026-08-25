@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap">
+  <style>
+    body {
+      margin: 0;
+      background: #0B0F14;
+      color: #C9D4E0;
+      font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: #7FD1B9; }
+    a:hover { color: #A6E3D1; }
+    .box { border: 1px solid #26333F; }
+    .dim { color: #8A9BAC; }
+  </style>
+</helmet>
+
+<div style="width: 100%; padding: 34px; box-sizing: border-box; display: flex; flex-direction: column; gap: 26px;">
+
+  <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+    <span style="font-size: 13px; font-weight: 700; color: #7FD1B9;">~/ai-fun-questions</span>
+    <span class="dim" style="font-size: 11px;">DIRECTION B &mdash; terminal / dev-tool</span>
+  </div>
+
+  <!-- hero block -->
+  <div class="box" style="border-radius: 4px; padding: 30px; display: flex; flex-direction: column; gap: 18px;">
+    <span class="dim" style="font-size: 11px; letter-spacing: 0.1em;">// WORDPRESS PLUGIN</span>
+    <p style="margin: 0; font-size: 34px; line-height: 1.15; font-weight: 700; color: #EAF2F8;">
+      $ wp joke --fresh<br>
+      <span style="color: #7FD1B9;">&gt; no bank. no repeats.</span>
+    </p>
+    <p style="margin: 0; font-size: 13px; line-height: 1.7; color: #8A9BAC; max-width: 54ch;">
+      One shortcode. Your model, your server, your key. Every question generated
+      on request and discarded ten minutes later.
+    </p>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <span style="border: 1px solid #7FD1B9; color: #7FD1B9; font-size: 12px; font-weight: 700; padding: 10px 16px; border-radius: 3px;">[ get the plugin ]</span>
+      <span class="box" style="color: #8A9BAC; font-size: 12px; padding: 10px 16px; border-radius: 3px;">[ read the docs ]</span>
+    </div>
+  </div>
+
+  <!-- flow as ascii-ish pipeline -->
+  <div class="box" style="border-radius: 4px; padding: 26px; display: flex; flex-direction: column; gap: 16px;">
+    <span class="dim" style="font-size: 11px; letter-spacing: 0.1em;">// PIPELINE</span>
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+      <span class="box" style="font-size: 12px; padding: 12px 14px; border-radius: 3px; color: #EAF2F8;">visitor</span>
+      <span class="dim" style="font-size: 13px;">──▶</span>
+      <span class="box" style="font-size: 12px; padding: 12px 14px; border-radius: 3px; color: #EAF2F8;">wp rest</span>
+      <span class="dim" style="font-size: 13px;">──▶</span>
+      <span class="box" style="font-size: 12px; padding: 12px 14px; border-radius: 3px; color: #EAF2F8;">provider</span>
+      <span class="dim" style="font-size: 13px;">──▶</span>
+      <span style="border: 1px solid #7FD1B9; font-size: 12px; padding: 12px 14px; border-radius: 3px; color: #7FD1B9;">question</span>
+      <span class="dim" style="font-size: 13px;">──▶</span>
+      <span style="border: 1px dashed #C08A4A; font-size: 12px; padding: 12px 14px; border-radius: 3px; color: #C08A4A;">punchline (held)</span>
+    </div>
+    <p style="margin: 0; font-size: 12px; line-height: 1.7; color: #8A9BAC;">
+      punchline released on POST only, once per token, then dropped
+    </p>
+  </div>
+
+  <!-- three column blocks -->
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px;">
+    <div class="box" style="border-radius: 4px; padding: 20px; display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-size: 12px; font-weight: 700; color: #EAF2F8;">providers</span>
+      <span class="dim" style="font-size: 11px; line-height: 1.8;">ollama<br>openai-compatible<br>huggingface</span>
+    </div>
+    <div class="box" style="border-radius: 4px; padding: 20px; display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-size: 12px; font-weight: 700; color: #EAF2F8;">install</span>
+      <span class="dim" style="font-size: 11px; line-height: 1.8;">activate<br>set provider<br>[ai_fun_question]</span>
+    </div>
+    <div class="box" style="border-radius: 4px; padding: 20px; display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-size: 12px; font-weight: 700; color: #EAF2F8;">stores</span>
+      <span class="dim" style="font-size: 11px; line-height: 1.8;">no questions<br>no answers<br>rate limits only</span>
+    </div>
+  </div>
+
+  <p style="margin: 0; font-size: 11px; line-height: 1.7; color: #7A8B9C;">
+    Trade-off: speaks fluently to developers and self-hosters, and makes the privacy story
+    the headline. Colder for a general WordPress audience, and the joke widget itself reads
+    as less playful than the warm direction.
+  </p>
+
+</div>
+</x-dc>
+</body>
+</html>

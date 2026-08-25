@@ -62,6 +62,45 @@ PROMPT;
 		}
 	}
 
+	/**
+	 * Subjects the user turn rotates through.
+	 *
+	 * Not a question bank: these steer the model's topic, they are not jokes
+	 * and no generated content is stored.
+	 */
+	const TOPICS = array(
+		'programming languages',
+		'debugging',
+		'WordPress',
+		'databases',
+		'version control',
+		'the command line',
+		'artificial intelligence',
+		'networking',
+		'web browsers',
+		'cloud hosting',
+		'passwords and security',
+		'hardware',
+	);
+
+	/**
+	 * Second variation axis, crossed with TOPICS.
+	 *
+	 * One axis was not enough: two requests that drew the same topic still came
+	 * back with the same joke, because the model has a favourite one per
+	 * subject. Crossing topic with an angle makes that collision far rarer.
+	 */
+	const ANGLES = array(
+		'a pun on a technical term',
+		'a misunderstanding between two pieces of software',
+		'a workplace situation',
+		'an everyday object compared to technology',
+		'a play on an error message',
+		'a relationship or breakup framing',
+		'an exaggerated boast',
+		'a double meaning in ordinary English',
+	);
+
 	public static function request_body( $model ) {
 		return array(
 			'model'    => $model,
@@ -72,11 +111,34 @@ PROMPT;
 				),
 				array(
 					'role'    => 'user',
-					'content' => 'Generate one fresh question now.',
+					'content' => self::user_prompt(),
 				),
 			),
 			'temperature' => 0.9,
 			'stream'      => false,
+		);
+	}
+
+	/**
+	 * User turn for one generation.
+	 *
+	 * Two widgets rendering at the same second send the same system prompt to
+	 * the same model, and an identical prompt invites an identical completion —
+	 * several widgets on one page were returning the same joke. Rotating the
+	 * subject and carrying a throwaway variation key makes each request its own
+	 * sample without touching the rules in PROMPT.
+	 *
+	 * @return string
+	 */
+	private static function user_prompt() {
+		$topic = self::TOPICS[ array_rand( self::TOPICS ) ];
+		$angle = self::ANGLES[ array_rand( self::ANGLES ) ];
+
+		return sprintf(
+			'Generate one fresh question now. Make it about %1$s, built on %2$s. Variation key %3$s — never mention this key, and do not repeat a joke you would usually tell about this subject.',
+			$topic,
+			$angle,
+			wp_generate_password( 10, false, false )
 		);
 	}
 
