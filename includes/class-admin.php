@@ -8,6 +8,9 @@ class AI_FQ_Admin {
 
 	const PAGE_SLUG = 'ai-fun-questions';
 
+	/** Sentinel submitted by the model picker when the free-text box is in use. */
+	const CUSTOM_MODEL = '__custom';
+
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'add_menu' ) );
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
@@ -67,12 +70,12 @@ class AI_FQ_Admin {
 		$fields = array(
 			'ai_fq_provider'        => array( __CLASS__, 'sanitize_provider' ),
 			'ai_fq_ollama_url'      => array( __CLASS__, 'sanitize_url_field' ),
-			'ai_fq_ollama_model'    => 'sanitize_text_field',
+			'ai_fq_ollama_model'    => array( __CLASS__, 'sanitize_ollama_model' ),
 			'ai_fq_hf_token'        => array( __CLASS__, 'sanitize_hf_token' ),
-			'ai_fq_hf_model'        => 'sanitize_text_field',
+			'ai_fq_hf_model'        => array( __CLASS__, 'sanitize_hf_model' ),
 			'ai_fq_openai_endpoint' => array( __CLASS__, 'sanitize_url_field' ),
 			'ai_fq_openai_key'      => array( __CLASS__, 'sanitize_openai_key' ),
-			'ai_fq_openai_model'    => 'sanitize_text_field',
+			'ai_fq_openai_model'    => array( __CLASS__, 'sanitize_openai_model' ),
 		);
 
 		foreach ( $fields as $field => $callback ) {
@@ -106,6 +109,88 @@ class AI_FQ_Admin {
 		);
 	}
 
+	/**
+	 * Suggested models per provider, grouped by what they cost to run.
+	 *
+	 * Checked against the live catalogues, not from memory: OpenAI's pricing
+	 * page, the Hugging Face router (router.huggingface.co/v1/models) and the
+	 * Ollama library. Three filters were applied on top of "does it exist":
+	 *
+	 * - Gated Hugging Face repos (meta-llama, google/gemma) need a licence
+	 *   accepted on the Hub first, so they are left out of the list.
+	 * - Reasoning models that emit their thinking into the message body break
+	 *   the strict-JSON reply this plugin parses. OpenAI's gpt-5 tiers keep
+	 *   theirs out of the message, so they are listed; request_body() drops
+	 *   temperature for them, which they reject.
+	 *
+	 * Catalogues move, so this is a convenience list and never a whitelist:
+	 * the picker always offers a custom value, and the filter lets a site
+	 * replace the list outright.
+	 */
+	public static function models( $provider ) {
+		$models = array(
+			'openai'      => array(
+				/* translators: Group label in the model dropdown. */
+				__( 'Paid — low cost', 'ai-fun-questions' )          => array(
+					'gpt-5-nano',
+					'gpt-4.1-nano',
+					'gpt-4o-mini',
+					'gpt-5.6-luna',
+					'gpt-5-mini',
+					'gpt-4.1-mini',
+				),
+				/* translators: Group label in the model dropdown. */
+				__( 'Paid — higher capability', 'ai-fun-questions' ) => array(
+					'gpt-4.1',
+					'gpt-5.6-terra',
+					'gpt-4o',
+					'gpt-5.6-sol',
+				),
+			),
+			'huggingface' => array(
+				/*
+				 * Every model on the router is metered; the free allowance is
+				 * account credit, not a free model, so nothing here is free.
+				 */
+				/* translators: Group label in the model dropdown. */
+				__( 'Metered — lowest cost per token', 'ai-fun-questions' ) => array(
+					'Qwen/Qwen3-4B-Instruct-2507',
+					'openai/gpt-oss-20b',
+					'microsoft/phi-4',
+				),
+				/* translators: Group label in the model dropdown. */
+				__( 'Metered — larger models', 'ai-fun-questions' )         => array(
+					'openai/gpt-oss-120b',
+					'Qwen/Qwen3-Next-80B-A3B-Instruct',
+					'Qwen/Qwen3-235B-A22B-Instruct-2507',
+				),
+			),
+			'ollama'      => array(
+				/* translators: Group label in the model dropdown. */
+				__( 'Free — runs locally on your own hardware', 'ai-fun-questions' ) => array(
+					'gemma3',
+					'llama3.2',
+					'llama3.1',
+					'qwen2.5',
+					'mistral',
+					'phi4',
+					'smollm2',
+					'tinyllama',
+				),
+			),
+		);
+
+		$groups = isset( $models[ $provider ] ) ? $models[ $provider ] : array();
+
+		/**
+		 * Filters the suggested models offered for a provider.
+		 *
+		 * @param array  $groups   Group label => list of model identifiers.
+		 * @param string $provider Provider key.
+		 */
+		return apply_filters( 'ai_fq_provider_models', $groups, $provider );
+	}
+
 	public static function sanitize_provider( $value ) {
 		$value = sanitize_text_field( (string) $value );
 
@@ -122,6 +207,46 @@ class AI_FQ_Admin {
 
 	public static function sanitize_openai_key( $value ) {
 		return self::sanitize_secret( $value, 'ai_fq_openai_key' );
+	}
+
+	public static function sanitize_ollama_model( $value ) {
+		return self::sanitize_model( $value, 'ai_fq_ollama_model' );
+	}
+
+	public static function sanitize_hf_model( $value ) {
+		return self::sanitize_model( $value, 'ai_fq_hf_model' );
+	}
+
+	public static function sanitize_openai_model( $value ) {
+		return self::sanitize_model( $value, 'ai_fq_openai_model' );
+	}
+
+	/**
+	 * The picker submits either a listed model or the CUSTOM_MODEL marker, in
+	 * which case the free-text companion field carries the real value.
+	 *
+	 * A blank custom box would otherwise wipe a working model name, so it
+	 * falls back to what is already stored.
+	 */
+	private static function sanitize_model( $value, $option ) {
+		$value = sanitize_text_field( (string) $value );
+
+		if ( self::CUSTOM_MODEL !== $value ) {
+			return $value;
+		}
+
+		/*
+		 * options.php has already run check_admin_referer() for this settings
+		 * group before any sanitize callback fires, so the request is verified
+		 * by the time we read the companion field.
+		 */
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$custom = isset( $_POST[ $option . '_custom' ] )
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing
+			? sanitize_text_field( wp_unslash( $_POST[ $option . '_custom' ] ) )
+			: '';
+
+		return '' !== trim( $custom ) ? $custom : (string) get_option( $option, '' );
 	}
 
 	/**
@@ -276,9 +401,12 @@ class AI_FQ_Admin {
 						);
 						self::render_field(
 							array(
-								'name'  => 'ai_fq_ollama_model',
-								'label' => __( 'Ollama Model', 'ai-fun-questions' ),
-								'value' => get_option( 'ai_fq_ollama_model', 'gemma3' ),
+								'name'        => 'ai_fq_ollama_model',
+								'label'       => __( 'Ollama Model', 'ai-fun-questions' ),
+								'type'        => 'select',
+								'choices'     => self::models( 'ollama' ),
+								'value'       => get_option( 'ai_fq_ollama_model', 'gemma3' ),
+								'description' => __( 'The model must already be pulled on the machine running Ollama.', 'ai-fun-questions' ),
 							)
 						);
 						break;
@@ -299,7 +427,9 @@ class AI_FQ_Admin {
 							array(
 								'name'        => 'ai_fq_hf_model',
 								'label'       => __( 'Hugging Face Model', 'ai-fun-questions' ),
-								'value'       => get_option( 'ai_fq_hf_model', 'google/gemma-2-2b-it' ),
+								'type'        => 'select',
+								'choices'     => self::models( 'huggingface' ),
+								'value'       => get_option( 'ai_fq_hf_model', 'Qwen/Qwen3-4B-Instruct-2507' ),
 								'description' => __( 'Use a chat-completion model available through Hugging Face Inference Providers.', 'ai-fun-questions' ),
 							)
 						);
@@ -328,9 +458,12 @@ class AI_FQ_Admin {
 						);
 						self::render_field(
 							array(
-								'name'  => 'ai_fq_openai_model',
-								'label' => __( 'OpenAI-compatible Model', 'ai-fun-questions' ),
-								'value' => get_option( 'ai_fq_openai_model', 'gpt-4o-mini' ),
+								'name'        => 'ai_fq_openai_model',
+								'label'       => __( 'OpenAI-compatible Model', 'ai-fun-questions' ),
+								'type'        => 'select',
+								'choices'     => self::models( 'openai' ),
+								'value'       => get_option( 'ai_fq_openai_model', 'gpt-4o-mini' ),
+								'description' => __( 'Listed models assume the default OpenAI endpoint. Pointing the endpoint elsewhere means using that service\'s own model names.', 'ai-fun-questions' ),
 							)
 						);
 						break;
@@ -358,6 +491,7 @@ class AI_FQ_Admin {
 				'constant'    => '',
 				'stored'      => false,
 				'full'        => false,
+				'choices'     => array(),
 			)
 		);
 
@@ -383,17 +517,21 @@ class AI_FQ_Admin {
 				<?php endif; ?>
 			</label>
 
-			<input
-				class="ai-fq-field__input"
-				type="<?php echo esc_attr( $args['type'] ); ?>"
-				id="<?php echo esc_attr( $id ); ?>"
-				name="<?php echo esc_attr( $args['name'] ); ?>"
-				value="<?php echo $args['secret'] ? '' : esc_attr( $args['value'] ); ?>"
-				<?php if ( $args['secret'] ) : ?>
-					autocomplete="new-password"
-					placeholder="<?php echo esc_attr( $args['stored'] ? str_repeat( "\xe2\x80\xa2", 12 ) : '' ); ?>"
-				<?php endif; ?>
-			>
+			<?php if ( 'select' === $args['type'] ) : ?>
+				<?php self::render_model_picker( $id, $args ); ?>
+			<?php else : ?>
+				<input
+					class="ai-fq-field__input"
+					type="<?php echo esc_attr( $args['type'] ); ?>"
+					id="<?php echo esc_attr( $id ); ?>"
+					name="<?php echo esc_attr( $args['name'] ); ?>"
+					value="<?php echo $args['secret'] ? '' : esc_attr( $args['value'] ); ?>"
+					<?php if ( $args['secret'] ) : ?>
+						autocomplete="new-password"
+						placeholder="<?php echo esc_attr( $args['stored'] ? str_repeat( "\xe2\x80\xa2", 12 ) : '' ); ?>"
+					<?php endif; ?>
+				>
+			<?php endif; ?>
 
 			<?php if ( $args['secret'] && $args['stored'] ) : ?>
 				<label class="ai-fq-field__clear">
@@ -411,6 +549,58 @@ class AI_FQ_Admin {
 				<p class="ai-fq-field__description"><?php echo esc_html( $description ); ?></p>
 			<?php endif; ?>
 		</div>
+		<?php
+	}
+
+	/**
+	 * A grouped model dropdown plus a free-text box for anything not listed.
+	 *
+	 * The dropdown carries the option name so the page still works with
+	 * JavaScript off; the companion box is only read when CUSTOM_MODEL is
+	 * submitted. JavaScript just hides the box while a listed model is chosen.
+	 */
+	private static function render_model_picker( $id, $args ) {
+		$value    = (string) $args['value'];
+		$is_known = false;
+
+		foreach ( $args['choices'] as $models ) {
+			if ( in_array( $value, $models, true ) ) {
+				$is_known = true;
+				break;
+			}
+		}
+
+		$custom_id = $id . '-custom';
+		?>
+		<select
+			class="ai-fq-field__select"
+			id="<?php echo esc_attr( $id ); ?>"
+			name="<?php echo esc_attr( $args['name'] ); ?>"
+			data-ai-fq-model="<?php echo esc_attr( $custom_id ); ?>"
+		>
+			<?php foreach ( $args['choices'] as $group => $models ) : ?>
+				<optgroup label="<?php echo esc_attr( $group ); ?>">
+					<?php foreach ( $models as $model ) : ?>
+						<option value="<?php echo esc_attr( $model ); ?>" <?php selected( $value, $model ); ?>>
+							<?php echo esc_html( $model ); ?>
+						</option>
+					<?php endforeach; ?>
+				</optgroup>
+			<?php endforeach; ?>
+
+			<option value="<?php echo esc_attr( self::CUSTOM_MODEL ); ?>" <?php selected( $is_known, false ); ?>>
+				<?php esc_html_e( 'Custom model…', 'ai-fun-questions' ); ?>
+			</option>
+		</select>
+
+		<input
+			class="ai-fq-field__input ai-fq-field__custom<?php echo $is_known ? ' is-hidden' : ''; ?>"
+			type="text"
+			id="<?php echo esc_attr( $custom_id ); ?>"
+			name="<?php echo esc_attr( $args['name'] ); ?>_custom"
+			value="<?php echo $is_known ? '' : esc_attr( $value ); ?>"
+			placeholder="<?php esc_attr_e( 'Exact model name', 'ai-fun-questions' ); ?>"
+		>
 		<?php
 	}
 

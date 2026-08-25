@@ -95,5 +95,27 @@
 		});
 	});
 
+	/*
+	 * The model dropdown owns the saved value; the free-text box only matters
+	 * while "Custom model…" is picked, so it stays out of the way otherwise.
+	 */
+	form.querySelectorAll('[data-ai-fq-model]').forEach((select) => {
+		const custom = document.getElementById(select.dataset.aiFqModel);
+
+		if (!custom) {
+			return;
+		}
+
+		select.addEventListener('change', () => {
+			const isCustom = select.value === '__custom';
+
+			custom.classList.toggle('is-hidden', !isCustom);
+
+			if (isCustom) {
+				custom.focus();
+			}
+		});
+	});
+
 	syncPanels();
 })();

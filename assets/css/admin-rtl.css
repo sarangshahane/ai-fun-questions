@@ -402,6 +402,44 @@ body.settings_page_ai-fun-questions #wpcontent {
 	outline: 0;
 }
 
+/* Model picker: same shell as a text input, with a chevron of our own. */
+.ai-fq-field__select {
+	display: block;
+	width: 100%;
+	min-height: 46px;
+	max-width: none;
+	margin: 0;
+	padding: 11px 15px 11px 40px;
+	border: 1px solid var(--ai-fq-border-strong);
+	border-radius: var(--ai-fq-radius-sm);
+	background-color: var(--ai-fq-surface);
+	/* Inline SVG chevron: no extra request, and it inherits nothing to break. */
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: left 14px center;
+	box-shadow: none;
+	font-size: 14px;
+	line-height: 1.5;
+	color: var(--ai-fq-text);
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+}
+
+.ai-fq-field__select:focus {
+	border-color: var(--ai-fq-accent);
+	box-shadow: 0 0 0 3px var(--ai-fq-accent-soft);
+	outline: 0;
+}
+
+.ai-fq-field__custom {
+	margin-top: 9px;
+}
+
+.ai-fq-field__custom.is-hidden {
+	display: none;
+}
+
 .ai-fq-field__description {
 	margin: 8px 0 0;
 	max-width: 62ch;
