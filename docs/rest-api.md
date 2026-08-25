@@ -6,7 +6,7 @@
 ai-fun-questions/v1
 ```
 
-The POC follows WordPress's REST API model and registers routes during `rest_api_init`. WordPress documents `register_rest_route()` as the mechanism for registering custom REST routes and requires the route to be registered on `rest_api_init`.
+The plugin follows WordPress's REST API model and registers routes during `rest_api_init`. WordPress documents `register_rest_route()` as the mechanism for registering custom REST routes and requires the route to be registered on `rest_api_init`.
 
 Official references:
 
@@ -61,7 +61,7 @@ The token is random and is used as the transient key suffix.
 
 ## Rate Limiting
 
-The POC applies a short transient-based request limit to question generation. It is intentionally lightweight and should not be treated as a production-grade abuse-prevention system.
+The plugin applies a short transient-based request limit to question generation. It is intentionally lightweight and should not be treated as a production-grade abuse-prevention system.
 
 ## Production Recommendation
 

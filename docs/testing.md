@@ -46,7 +46,7 @@
 
 ## Production Readiness
 
-The following should remain unchecked for the POC and be addressed before a production release:
+The following are out of scope for this release and should be addressed before wider deployment:
 
 - [ ] Single-use reveal token.
 - [ ] Dedicated POST reveal endpoint.

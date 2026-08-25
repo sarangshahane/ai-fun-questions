@@ -16,7 +16,7 @@ The shortcode is registered by `AI_FQ_Frontend`.
 4. The question and optional hint are displayed.
 5. The visitor enters an answer.
 6. The visitor clicks **Submit Answer**.
-7. The POC retrieves and displays the AI punchline.
+7. The widget retrieves and displays the AI punchline.
 8. **Next Question** requests another AI-generated question.
 
 ## Browser State
@@ -25,7 +25,7 @@ The browser stores only the temporary token and the currently displayed question
 
 ## Styling
 
-The POC CSS is intentionally simple and contained under `.ai-fq` / `.ai-fq__*` selectors to minimize theme conflicts.
+The CSS is intentionally simple and contained under `.ai-fq` / `.ai-fq__*` selectors to minimize theme conflicts.
 
 ## Future UI Improvements
 

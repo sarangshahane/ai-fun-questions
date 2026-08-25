@@ -232,6 +232,6 @@ See `docs/testing.md` for the manual test checklist.
 
 ---
 
-## POC scope
+## Scope
 
 This project intentionally remains small and modular. It does not include analytics, a question-management UI, user accounts, persistent answer history, or a permanent question bank.
