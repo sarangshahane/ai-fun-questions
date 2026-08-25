@@ -8,7 +8,7 @@ class AI_FQ_HuggingFace_Provider implements AI_FQ_Provider_Interface {
 
 	public function generate_question() {
 		$token = defined( 'AI_FQ_HF_TOKEN' ) ? trim( AI_FQ_HF_TOKEN ) : trim( get_option( 'ai_fq_hf_token', '' ) );
-		$model = trim( get_option( 'ai_fq_hf_model', 'google/gemma-2-2b-it' ) );
+		$model = trim( get_option( 'ai_fq_hf_model', 'Qwen/Qwen3-4B-Instruct-2507' ) );
 
 		if ( empty( $token ) || empty( $model ) ) {
 			return new WP_Error(

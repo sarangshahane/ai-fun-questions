@@ -51,7 +51,7 @@ Default endpoint is `http://localhost:11434/api/chat` and the default model is `
 
 = Hugging Face =
 
-Requests go to the Hugging Face router endpoint. The default model is `google/gemma-2-2b-it`. Use a chat-completion model available through Hugging Face Inference Providers.
+Requests go to the Hugging Face router endpoint. The default model is `Qwen/Qwen3-4B-Instruct-2507`. Use a chat-completion model available through Hugging Face Inference Providers.
 
 = OpenAI-compatible =
 
