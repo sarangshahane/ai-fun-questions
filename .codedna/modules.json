@@ -1,0 +1,29 @@
+{
+  "modules": [
+    {
+      "id": "providers",
+      "path": "includes/providers",
+      "claude": "includes/providers/CLAUDE.md",
+      "architecture": "includes/providers/architecture.md",
+      "language": "php",
+      "confidence": "high",
+      "reason": "source-cluster",
+      "owner": "UNKNOWN"
+    },
+    {
+      "id": "widget-security",
+      "paths": [
+        "includes/class-rest-api.php",
+        "includes/class-rate-limiter.php",
+        "includes/class-frontend.php",
+        "assets/js/frontend.js",
+        "templates/question-widget.php"
+      ],
+      "rule": ".claude/rules/widget-security.md",
+      "language": "php",
+      "confidence": "pinned",
+      "reason": "pinned",
+      "owner": "UNKNOWN"
+    }
+  ]
+}
