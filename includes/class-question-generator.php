@@ -102,7 +102,7 @@ PROMPT;
 	);
 
 	public static function request_body( $model ) {
-		return array(
+		$body = array(
 			'model'    => $model,
 			'messages' => array(
 				array(
@@ -114,9 +114,34 @@ PROMPT;
 					'content' => self::user_prompt(),
 				),
 			),
-			'temperature' => 0.9,
-			'stream'      => false,
+			'stream'   => false,
 		);
+
+		if ( self::accepts_temperature( $model ) ) {
+			$body['temperature'] = 0.9;
+		}
+
+		return $body;
+	}
+
+	/**
+	 * OpenAI's gpt-5 and o-series reject any temperature but their default and
+	 * fail the whole request with HTTP 400, so the parameter is left off for
+	 * them. Their default sampling is varied enough, and user_prompt() is what
+	 * actually keeps concurrent widgets from repeating each other.
+	 *
+	 * Matched narrowly on purpose: openai/gpt-oss-* on Hugging Face and
+	 * gpt-oss on Ollama are ordinary chat models that do accept temperature,
+	 * and neither starts with a bare "gpt-5" or "o<digit>".
+	 */
+	private static function accepts_temperature( $model ) {
+		$model = strtolower( trim( (string) $model ) );
+
+		if ( preg_match( '/^gpt-5([.\-]|$)/', $model ) ) {
+			return false;
+		}
+
+		return ! preg_match( '/^o[0-9]+(-|$)/', $model );
 	}
 
 	/**
