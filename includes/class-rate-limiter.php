@@ -9,6 +9,15 @@ class AI_FQ_Rate_Limiter {
 	const WINDOW = 60;
 	const LIMIT  = 5;
 
+	/**
+	 * Ceiling applied per client IP, above the finer per-client limit.
+	 *
+	 * The per-client bucket mixes in the User-Agent, which the caller controls,
+	 * so rotating it alone would mint a fresh quota. This ceiling is keyed on
+	 * the IP only and cannot be rotated away from the same address.
+	 */
+	const IP_LIMIT = 15;
+
 	public static function init() {
 		add_filter( 'cron_schedules', array( __CLASS__, 'add_cleanup_schedule' ) );
 
@@ -19,7 +28,12 @@ class AI_FQ_Rate_Limiter {
 		add_action( 'ai_fq_cleanup_rate_limits', array( __CLASS__, 'cleanup' ) );
 	}
 
-	public static function allow( $bucket ) {
+	/**
+	 * @param string   $bucket        Bucket key to count against.
+	 * @param int|null $default_limit Per-window allowance, defaulting to self::LIMIT.
+	 * @return bool
+	 */
+	public static function allow( $bucket, $default_limit = null ) {
 		global $wpdb;
 
 		$table = self::table_name();
@@ -63,7 +77,7 @@ class AI_FQ_Rate_Limiter {
 			)
 		);
 
-		return $count <= self::limit( $bucket );
+		return $count <= self::limit( $bucket, $default_limit );
 	}
 
 	/**
@@ -74,13 +88,16 @@ class AI_FQ_Rate_Limiter {
 	 * plugin. The bucket is passed so a site can limit generation and answer
 	 * submissions differently.
 	 *
-	 * @param string $bucket Bucket key the limit is being applied to.
+	 * @param string   $bucket  Bucket key the limit is being applied to.
+	 * @param int|null $default Allowance before filtering, defaulting to self::LIMIT.
 	 * @return int
 	 */
-	public static function limit( $bucket = '' ) {
-		$limit = (int) apply_filters( 'ai_fq_rate_limit', self::LIMIT, $bucket );
+	public static function limit( $bucket = '', $default = null ) {
+		$default = ( null === $default || (int) $default <= 0 ) ? self::LIMIT : (int) $default;
 
-		return $limit > 0 ? $limit : self::LIMIT;
+		$limit = (int) apply_filters( 'ai_fq_rate_limit', $default, $bucket );
+
+		return $limit > 0 ? $limit : $default;
 	}
 
 	public static function cleanup() {
