@@ -23,9 +23,8 @@
 	 */
 	--ai-fq-font-hand: "Bradley Hand", "Segoe Print", "Chalkboard SE", "Comic Sans MS", "Comic Neue", cursive;
 
-	max-width: 1180px;
-	margin-left: 20px;
-	padding: 8px 0 60px;
+	margin: 0;
+	padding: 20px 40px;
 	color: var(--ai-fq-text);
 	font-size: 14px;
 	line-height: 1.55;
@@ -35,6 +34,15 @@
 body.settings_page_ai-fun-questions #wpcontent,
 body.settings_page_ai-fun-questions #wpbody-content {
 	background: var(--ai-fq-bg);
+}
+
+/*
+ * Core pads #wpcontent away from the admin menu, which would stack on top of
+ * the wrap's own gutter and leave the two sides uneven. The wrap owns the
+ * gutter here.
+ */
+body.settings_page_ai-fun-questions #wpcontent {
+	padding-right: 0;
 }
 
 .ai-fq-admin *,
@@ -124,6 +132,43 @@ body.settings_page_ai-fun-questions #wpbody-content {
 	border-radius: var(--ai-fq-radius-sm);
 	background: var(--ai-fq-surface);
 	box-shadow: none;
+}
+
+/* --------------------------------------------------------- Form layout */
+
+/*
+ * Settings on the left at the width they already had, reference material
+ * parked in a rail on the right. Only the wrapper is new; every block inside
+ * keeps its own styling.
+ */
+.ai-fq-form {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 340px;
+	gap: 26px;
+	align-items: start;
+}
+
+.ai-fq-form__main {
+	min-width: 0;
+}
+
+.ai-fq-form__aside {
+	min-width: 0;
+	position: sticky;
+	/* Clear the fixed admin bar; the fallback covers pre-5.9 admin screens. */
+	top: calc(var(--wp-admin--admin-bar--height, 32px) + 14px);
+}
+
+.ai-fq-form__aside .ai-fq-card {
+	margin-top: 0;
+}
+
+.ai-fq-form__aside .ai-fq-card + .ai-fq-card {
+	margin-top: 18px;
+}
+
+.ai-fq-savebar {
+	grid-column: 1 / -1;
 }
 
 /* ------------------------------------------------------ Provider picker */
@@ -258,19 +303,22 @@ body.settings_page_ai-fun-questions #wpbody-content {
 
 /* ------------------------------------------------------------- Panels */
 
+/*
+ * Only the selected provider's panel is on screen. The others stay in the
+ * form so their saved credentials still submit untouched; they are hidden,
+ * not removed.
+ */
 .ai-fq-panel {
+	display: none;
 	margin: 0 0 18px;
 	padding: 22px 26px 26px;
-	border: 1px dashed var(--ai-fq-border-strong);
+	border: 1px solid var(--ai-fq-border);
 	border-radius: var(--ai-fq-radius);
-	background: var(--ai-fq-surface-muted);
-	transition: background-color 0.15s ease, border-color 0.15s ease;
+	background: var(--ai-fq-surface);
 }
 
 .ai-fq-panel.is-active {
-	border-style: solid;
-	border-color: var(--ai-fq-border);
-	background: var(--ai-fq-surface);
+	display: block;
 }
 
 .ai-fq-panel__header {
@@ -480,6 +528,18 @@ body.settings_page_ai-fun-questions #wpbody-content {
 /* ---------------------------------------------------------- Responsive */
 
 @media screen and (max-width: 1100px) {
+	.ai-fq-form {
+		display: block;
+	}
+
+	.ai-fq-form__aside {
+		position: static;
+	}
+
+	.ai-fq-form__aside .ai-fq-card {
+		margin-top: 26px;
+	}
+
 	.ai-fq-providers__grid {
 		grid-template-columns: 1fr;
 		gap: 12px;
@@ -488,8 +548,7 @@ body.settings_page_ai-fun-questions #wpbody-content {
 
 @media screen and (max-width: 782px) {
 	.ai-fq-admin {
-		margin-left: 12px;
-		padding-bottom: 40px;
+		padding: 20px;
 	}
 
 	.ai-fq-admin__title {
