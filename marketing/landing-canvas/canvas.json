@@ -1,0 +1,63 @@
+{
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "Landing page"
+    },
+    {
+      "id": "page-2",
+      "name": "Not chosen"
+    }
+  ],
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 4700,
+      "title": "Landing page \u2014 desktop",
+      "page": "page-1"
+    },
+    {
+      "file": "Mobile.dc.html",
+      "x": 1560,
+      "y": 0,
+      "w": 390,
+      "h": 1980,
+      "title": "Phone width",
+      "page": "page-1"
+    },
+    {
+      "file": "DirectionB.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1000,
+      "h": 950,
+      "title": "Direction B \u2014 terminal (sketch)",
+      "page": "page-2"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "placeholders",
+      "x": 0,
+      "y": -150,
+      "w": 460,
+      "text": "Chosen direction \u2014 this is the one going to production.\n\nStill to fill in: [YOUR DOWNLOAD URL] and [YOUR DOCS URL] in the closing CTA.\n\nThe demo widget here is interactive but runs on four sample riddles baked into the artboard. On the real site the shortcode calls your AI provider.",
+      "page": "page-1"
+    },
+    {
+      "id": "direction-note",
+      "x": 0,
+      "y": -150,
+      "w": 420,
+      "text": "Not chosen \u2014 kept for reference.\n\nThe terminal/dev-tool direction: monospace, dark, privacy and self-hosting as the headline. Reads well to developers, colder to a general WordPress audience.",
+      "page": "page-2"
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-1"
+  }
+}

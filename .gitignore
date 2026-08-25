@@ -7,9 +7,6 @@ package-lock.json
 
 .DS_Store
 
-# Marketing assets — never shipped in the release zip
-/marketing/
-
 # Engineering context for AI tooling — local only, never pushed
 /.claude/
 /.codedna/

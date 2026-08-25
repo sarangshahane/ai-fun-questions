@@ -1,0 +1,483 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+  <style>
+    body {
+      margin: 0;
+      background: #FBFAF8;
+      color: #111827;
+      font-family: "Public Sans", "Helvetica Neue", Helvetica, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: #B4741B; text-decoration: none; }
+    a:hover { color: #8A570F; }
+    .dsp { font-family: "Bricolage Grotesque", "Helvetica Neue", Helvetica, sans-serif; letter-spacing: -0.02em; }
+    .mono { font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+    textarea { font-family: inherit; }
+  </style>
+</helmet>
+
+<div style="width: 100%; overflow: hidden;">
+
+  <!-- ================= NAV ================= -->
+  <div style="display: flex; align-items: center; justify-content: space-between; gap: 24px; max-width: 1160px; margin: 0 auto; padding: 28px 40px 0 40px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3a9 9 0 0 0-9 9c0 2.2.8 4.2 2.1 5.7L4 21l3.6-1.2A9 9 0 1 0 12 3Z"></path>
+        <path d="M9.2 9.6a2.8 2.8 0 0 1 5.5.8c0 1.9-2.7 2.3-2.7 4"></path>
+        <path d="M12 17.2h.01"></path>
+      </svg>
+      <span class="dsp" style="font-size: 17px; font-weight: 800;">AI Fun Questions</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 26px;">
+      <a href="#how" style="font-size: 14px; font-weight: 600; color: #4B5563;">How it works</a>
+      <a href="#use" style="font-size: 14px; font-weight: 600; color: #4B5563;">Where to use it</a>
+      <a href="#setup" style="font-size: 14px; font-weight: 600; color: #4B5563;">Setup</a>
+      <a href="#get" style="display: inline-block; background: #111827; color: #fff; font-size: 14px; font-weight: 600; padding: 11px 18px; border-radius: 9px;">Get the plugin</a>
+    </div>
+  </div>
+
+  <!-- ================= HERO ================= -->
+  <div style="max-width: 1160px; margin: 0 auto; padding: 76px 40px 0 40px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 64px; align-items: center;">
+
+    <div style="display: flex; flex-direction: column; gap: 26px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="eyebrow" style="background: #FBEFD9; color: #8A570F; padding: 6px 11px; border-radius: 999px;">WordPress plugin</span>
+        <span class="eyebrow" style="color: #6B7280;">Requires WP 6.4+ &middot; PHP 7.4+</span>
+      </div>
+
+      <h1 class="dsp" style="margin: 0; font-size: 68px; line-height: 0.98; font-weight: 800; text-wrap: pretty;">
+        Nobody has heard<br>this joke before.
+      </h1>
+
+      <p style="margin: 0; font-size: 19px; line-height: 1.55; color: #4B5563; max-width: 30em; text-wrap: pretty;">
+        A tiny widget that asks an AI for one fresh tech riddle, right when a visitor
+        wants one. There is no joke database to run dry &mdash; every question is written
+        on the spot, held for ten minutes, then thrown away.
+      </p>
+
+      <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+        <a href="#get" style="display: inline-block; background: #111827; color: #fff; font-size: 15px; font-weight: 600; padding: 15px 26px; border-radius: 10px;">Add it to your site</a>
+        <a href="#demo" style="display: inline-flex; align-items: center; gap: 8px; background: #F3F4F6; color: #111827; font-size: 15px; font-weight: 600; padding: 15px 22px; border-radius: 10px;">
+          Try it right here
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>
+        </a>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 22px; padding-top: 6px; flex-wrap: wrap;">
+        <span class="mono" style="font-size: 12px; font-weight: 500; color: #6B7280;">3 AI providers</span>
+        <span style="width: 4px; height: 4px; border-radius: 999px; background: #D1D5DB;"></span>
+        <span class="mono" style="font-size: 12px; font-weight: 500; color: #6B7280;">0 questions stored</span>
+        <span style="width: 4px; height: 4px; border-radius: 999px; background: #D1D5DB;"></span>
+        <span class="mono" style="font-size: 12px; font-weight: 500; color: #6B7280;">GPL-2.0-or-later</span>
+      </div>
+    </div>
+
+    <!-- hero: the live widget. On the built page this slot is the shortcode. -->
+    <div>
+      <div style="padding: 28px; border: 1px solid #e5e7eb; border-radius: 16px; background: #fff; box-shadow: 0 8px 30px rgba(0,0,0,0.06); display: flex; flex-direction: column; gap: 16px;">
+        <span class="eyebrow" style="color: #6B7280;">AI fun question</span>
+        <p style="margin: 0; font-size: 21px; font-weight: 600; line-height: 1.35; min-height: 58px;">{{ question }}</p>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label for="aifq-demo-answer" style="font-size: 13px; font-weight: 600; color: #374151;">Your answer</label>
+          <textarea id="aifq-demo-answer" rows="2" placeholder="What do you think?" value="{{ answer }}" onChange="{{ onAnswer }}" style="box-sizing: border-box; width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 15px; resize: vertical;"></textarea>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button onClick="{{ onSubmit }}" style="border: 0; background: #111827; color: #fff; border-radius: 9px; padding: 11px 16px; font-size: 15px; font-weight: 600; cursor: pointer;">Submit Answer</button>
+          <button onClick="{{ onNext }}" style="border: 0; background: #f3f4f6; color: #111827; border-radius: 9px; padding: 11px 16px; font-size: 15px; font-weight: 600; cursor: pointer;">Next Question</button>
+        </div>
+
+        <sc-if value="{{ revealed }}" hint-placeholder-val="{{ true }}">
+          <div style="background: #f8fafc; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <span class="eyebrow" style="font-size: 11px; color: #6B7280;">Your answer</span>
+              <span style="font-size: 15px; white-space: pre-line;">{{ shownAnswer }}</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <span class="eyebrow" style="font-size: 11px; color: #6B7280;">The AI punchline</span>
+              <span style="font-size: 15px; font-weight: 600;">{{ punchline }}</span>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showHint }}" hint-placeholder-val="{{ false }}">
+          <span style="font-size: 13px; color: #6B7280;">{{ hint }}</span>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ONE SHORTCODE ================= -->
+  <div id="demo" style="max-width: 1160px; margin: 0 auto; padding: 96px 40px 0 40px;">
+    <div style="background: #111827; border-radius: 24px; padding: 48px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px; align-items: center;">
+      <div style="display: flex; flex-direction: column; gap: 18px;">
+        <span class="eyebrow" style="color: #E4922B;">One shortcode</span>
+        <h2 class="dsp" style="margin: 0; font-size: 38px; line-height: 1.06; font-weight: 800; color: #fff;">That is the entire integration.</h2>
+        <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #9CA3AF; max-width: 26em;">
+          Drop it into a post, a page, a block or a widget area. No settings per
+          instance, no shortcode attributes to learn.
+        </p>
+      </div>
+      <div class="mono" style="background: #1F2937; border: 1px solid #374151; border-radius: 10px; padding: 16px 18px; font-size: 16px; font-weight: 700; color: #FBEFD9;">
+        [ai_fun_question]
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= HOW IT WORKS ================= -->
+  <div id="how" style="max-width: 1160px; margin: 0 auto; padding: 118px 40px 0 40px;">
+    <div style="display: flex; flex-direction: column; gap: 14px; max-width: 34em;">
+      <span class="eyebrow" style="color: #B4741B;">How it works</span>
+      <h2 class="dsp" style="margin: 0; font-size: 46px; line-height: 1.04; font-weight: 800;">Four steps, and the punchline never leaves the server early.</h2>
+    </div>
+
+    <!-- flow -->
+    <div style="display: flex; align-items: stretch; gap: 18px; padding-top: 52px;">
+
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 14px; background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
+          <span class="mono" style="font-size: 12px; font-weight: 700; color: #6B7280;">01</span>
+        </div>
+        <span class="dsp" style="font-size: 17px; font-weight: 800;">A visitor lands</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #6B7280;">The widget renders and asks your site for one question. No account, no cookie, no login.</p>
+      </div>
+
+      <div style="display: flex; align-items: center; padding-top: 40px;">
+        <svg width="30" height="18" viewBox="0 0 30 18" fill="none" stroke="#E4922B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 9h26"></path><path d="m21 3 6 6-6 6"></path></svg>
+      </div>
+
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 14px; background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="2"></rect><rect x="3" y="13" width="18" height="7" rx="2"></rect><path d="M7 7.5h.01M7 16.5h.01"></path></svg>
+          <span class="mono" style="font-size: 12px; font-weight: 700; color: #6B7280;">02</span>
+        </div>
+        <span class="dsp" style="font-size: 17px; font-weight: 800;">WordPress asks the AI</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #6B7280;">Your server calls the provider you configured, with your key. The browser never sees it.</p>
+      </div>
+
+      <div style="display: flex; align-items: center; padding-top: 40px;">
+        <svg width="30" height="18" viewBox="0 0 30 18" fill="none" stroke="#E4922B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 9h26"></path><path d="m21 3 6 6-6 6"></path></svg>
+      </div>
+
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 14px; background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 0 0-9 9c0 2.2.8 4.2 2.1 5.7L4 21l3.6-1.2A9 9 0 1 0 12 3Z"></path><path d="M9.2 9.6a2.8 2.8 0 0 1 5.5.8c0 1.9-2.7 2.3-2.7 4"></path></svg>
+          <span class="mono" style="font-size: 12px; font-weight: 700; color: #6B7280;">03</span>
+        </div>
+        <span class="dsp" style="font-size: 17px; font-weight: 800;">The question appears</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #6B7280;">Question and hint go to the browser. The punchline stays behind, in a ten-minute transient.</p>
+      </div>
+
+      <div style="display: flex; align-items: center; padding-top: 40px;">
+        <svg width="30" height="18" viewBox="0 0 30 18" fill="none" stroke="#E4922B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 9h26"></path><path d="m21 3 6 6-6 6"></path></svg>
+      </div>
+
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 14px; background: #111827; border: 1px solid #111827; border-radius: 16px; padding: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#E4922B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12.5 11 15l4.5-5"></path><rect x="3" y="4" width="18" height="16" rx="3"></rect></svg>
+          <span class="mono" style="font-size: 12px; font-weight: 700; color: #D1D5DB;">04</span>
+        </div>
+        <span class="dsp" style="font-size: 17px; font-weight: 800; color: #fff;">They answer, you reveal</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #9CA3AF;">The answer is posted back, the punchline is released once, and the question is discarded.</p>
+      </div>
+    </div>
+
+    <!-- the boundary callout -->
+    <div style="margin-top: 26px; display: flex; align-items: flex-start; gap: 16px; background: #FBEFD9; border-radius: 16px; padding: 24px 26px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8A570F" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+      <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #6B4310; max-width: 62em;">
+        <strong style="color: #4A2E08;">Why that matters:</strong> the punchline is never sent with the question, and it is
+        only ever released over POST, once per question. Nobody wins by reading the page source. Provider keys stay
+        server-side, AI output is sanitised before it is stored, and requests are rate limited per visitor and per IP.
+      </p>
+    </div>
+  </div>
+
+  <!-- ================= PURPOSE ================= -->
+  <div style="max-width: 1160px; margin: 0 auto; padding: 118px 40px 0 40px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 64px; align-items: start;">
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <span class="eyebrow" style="color: #B4741B;">What it is for</span>
+      <h2 class="dsp" style="margin: 0; font-size: 46px; line-height: 1.04; font-weight: 800;">A small reason to stay a few seconds longer.</h2>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 22px; padding-top: 8px;">
+      <p style="margin: 0; font-size: 17px; line-height: 1.65; color: #374151;">
+        Most &ldquo;fun&rdquo; widgets ship a hundred jokes in an array. Visitors see the same
+        one twice and stop looking. This plugin has no bank to exhaust: it asks a
+        model for something new each time, so the tenth visit is as fresh as the first.
+      </p>
+      <p style="margin: 0; font-size: 17px; line-height: 1.65; color: #374151;">
+        It is deliberately small. One shortcode, one settings screen, no tracking, no
+        accounts, nothing stored about the person answering. Put it where a page would
+        otherwise be a dead end and let people play for ten seconds.
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 12px; padding-top: 6px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#E4922B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"></path></svg>
+          <span style="font-size: 15px; font-weight: 500;">No question bank, ever &mdash; it is a design rule, not an oversight</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#E4922B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"></path></svg>
+          <span style="font-size: 15px; font-weight: 500;">Answers are never stored permanently</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#E4922B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"></path></svg>
+          <span style="font-size: 15px; font-weight: 500;">Works for logged-out visitors, with no login prompt</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= WHERE ================= -->
+  <div id="use" style="max-width: 1160px; margin: 0 auto; padding: 118px 40px 0 40px;">
+    <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; flex-wrap: wrap;">
+      <div style="display: flex; flex-direction: column; gap: 14px; max-width: 30em;">
+        <span class="eyebrow" style="color: #B4741B;">Where to put it</span>
+        <h2 class="dsp" style="margin: 0; font-size: 46px; line-height: 1.04; font-weight: 800;">Anywhere a page goes quiet.</h2>
+      </div>
+      <p style="margin: 0; font-size: 15px; color: #6B7280; max-width: 22em;">It is a shortcode, so anywhere a shortcode runs &mdash; posts, pages, blocks, widget areas, page builders.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; padding-top: 44px;">
+
+      <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 26px; display: flex; flex-direction: column; gap: 12px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"></path><path d="M4 12h10"></path><path d="M4 19h7"></path></svg>
+        <span class="dsp" style="font-size: 18px; font-weight: 800;">The 404 page</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #6B7280;">Someone hit a dead link. Give them a riddle instead of an apology and a search box.</p>
+      </div>
+
+      <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 26px; display: flex; flex-direction: column; gap: 12px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"></rect><path d="M8 21h8"></path><path d="M12 18v3"></path></svg>
+        <span class="dsp" style="font-size: 18px; font-weight: 800;">A booth screen</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #6B7280;">WordCamp, a meetup, a careers fair. A laptop on a stand and something to talk about.</p>
+      </div>
+
+      <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 26px; display: flex; flex-direction: column; gap: 12px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><rect x="3" y="10" width="12" height="10" rx="2"></rect><path d="M19 10v10"></path></svg>
+        <span class="dsp" style="font-size: 18px; font-weight: 800;">A blog sidebar</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #6B7280;">A recurring bit of personality on a long-form tech blog, without another content chore.</p>
+      </div>
+
+      <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 26px; display: flex; flex-direction: column; gap: 12px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4"></path><rect x="4" y="7" width="16" height="13" rx="2"></rect><path d="M9 13h.01M15 13h.01"></path><path d="M9.5 17h5"></path></svg>
+        <span class="dsp" style="font-size: 18px; font-weight: 800;">An intranet break page</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #6B7280;">Self-host the model with Ollama and nothing leaves the building.</p>
+      </div>
+
+      <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 26px; display: flex; flex-direction: column; gap: 12px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z"></path><path d="m4 7 8 6 8-6"></path></svg>
+        <span class="dsp" style="font-size: 18px; font-weight: 800;">A thank-you page</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #6B7280;">After a signup or a purchase, when the work is done and the mood is good.</p>
+      </div>
+
+      <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 26px; display: flex; flex-direction: column; gap: 12px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16"></path><path d="M6 8v8"></path><path d="M18 8v8"></path></svg>
+        <span class="dsp" style="font-size: 18px; font-weight: 800;">A coming-soon holding page</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #6B7280;">Something to do while the real site is being built, other than leaving.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= WHO ================= -->
+  <div style="max-width: 1160px; margin: 0 auto; padding: 118px 40px 0 40px;">
+    <div style="display: flex; flex-direction: column; gap: 14px; max-width: 32em;">
+      <span class="eyebrow" style="color: #B4741B;">Who it is for</span>
+      <h2 class="dsp" style="margin: 0; font-size: 46px; line-height: 1.04; font-weight: 800;">If you can add a shortcode, you can run it.</h2>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; padding-top: 44px;">
+
+      <div style="border: 1px solid #E5E7EB; border-radius: 16px; padding: 30px; display: flex; flex-direction: column; gap: 14px; background: #fff;">
+        <span class="mono" style="font-size: 12px; font-weight: 700; color: #E4922B;">01</span>
+        <span class="dsp" style="font-size: 21px; font-weight: 800;">Site owners &amp; bloggers</span>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #6B7280;">
+          No code. Install, choose a provider, paste the shortcode. The whole setup is one
+          screen under Settings.
+        </p>
+      </div>
+
+      <div style="border: 1px solid #E5E7EB; border-radius: 16px; padding: 30px; display: flex; flex-direction: column; gap: 14px; background: #fff;">
+        <span class="mono" style="font-size: 12px; font-weight: 700; color: #E4922B;">02</span>
+        <span class="dsp" style="font-size: 21px; font-weight: 800;">Agencies &amp; freelancers</span>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #6B7280;">
+          A cheap bit of delight for a client build. Keys live in <span class="mono" style="font-size: 13px;">wp-config.php</span>,
+          so they never sit in a database you hand over.
+        </p>
+      </div>
+
+      <div style="border: 1px solid #E5E7EB; border-radius: 16px; padding: 30px; display: flex; flex-direction: column; gap: 14px; background: #fff;">
+        <span class="mono" style="font-size: 12px; font-weight: 700; color: #E4922B;">03</span>
+        <span class="dsp" style="font-size: 21px; font-weight: 800;">Developers</span>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #6B7280;">
+          A provider interface to implement, filters for rate limits and client IP, and a
+          self-hosted path through Ollama.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SETUP ================= -->
+  <div id="setup" style="max-width: 1160px; margin: 0 auto; padding: 118px 40px 0 40px;">
+    <div style="display: flex; flex-direction: column; gap: 14px; max-width: 32em;">
+      <span class="eyebrow" style="color: #B4741B;">How to use it</span>
+      <h2 class="dsp" style="margin: 0; font-size: 46px; line-height: 1.04; font-weight: 800;">Three steps, start to finish.</h2>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; padding-top: 44px;">
+
+      <div style="display: flex; flex-direction: column; gap: 16px; background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 28px;">
+        <div style="width: 34px; height: 34px; border-radius: 999px; background: #111827; color: #fff; display: flex; align-items: center; justify-content: center;">
+          <span class="mono" style="font-size: 14px; font-weight: 700;">1</span>
+        </div>
+        <span class="dsp" style="font-size: 20px; font-weight: 800;">Install and activate</span>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #6B7280;">Upload the plugin and activate it. It creates one small table for rate limiting and nothing else.</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px; background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 28px;">
+        <div style="width: 34px; height: 34px; border-radius: 999px; background: #111827; color: #fff; display: flex; align-items: center; justify-content: center;">
+          <span class="mono" style="font-size: 14px; font-weight: 700;">2</span>
+        </div>
+        <span class="dsp" style="font-size: 20px; font-weight: 800;">Point it at a model</span>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #6B7280;">
+          Open <strong style="color: #374151;">Settings &rsaquo; AI Fun Questions</strong>, pick a provider and paste a key &mdash;
+          or keep the key out of the database entirely:
+        </p>
+        <div class="mono" style="background: #F8FAFC; border: 1px solid #E5E7EB; border-radius: 10px; padding: 14px; font-size: 12.5px; line-height: 1.7; color: #374151; overflow-x: auto;">
+          define( 'AI_FQ_OPENAI_KEY',<br>&nbsp;&nbsp;&nbsp;&nbsp;'sk-&hellip;' );
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px; background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 28px;">
+        <div style="width: 34px; height: 34px; border-radius: 999px; background: #E4922B; color: #fff; display: flex; align-items: center; justify-content: center;">
+          <span class="mono" style="font-size: 14px; font-weight: 700;">3</span>
+        </div>
+        <span class="dsp" style="font-size: 20px; font-weight: 800;">Drop in the shortcode</span>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #6B7280;">Paste it into any post, page, block or widget area. That is the whole integration.</p>
+        <div class="mono" style="background: #111827; border-radius: 10px; padding: 14px 16px; font-size: 14px; font-weight: 700; color: #FBEFD9;">
+          [ai_fun_question]
+        </div>
+      </div>
+    </div>
+
+    <!-- providers -->
+    <div style="margin-top: 24px; display: flex; align-items: center; gap: 28px; flex-wrap: wrap; background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 26px 30px;">
+      <span class="eyebrow" style="color: #6B7280;">Pick a provider</span>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="width: 8px; height: 8px; border-radius: 999px; background: #E4922B;"></span>
+        <span style="font-size: 15px; font-weight: 600;">Ollama</span>
+        <span style="font-size: 14px; color: #6B7280;">self-hosted, nothing leaves your network</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="width: 8px; height: 8px; border-radius: 999px; background: #E4922B;"></span>
+        <span style="font-size: 15px; font-weight: 600;">OpenAI-compatible</span>
+        <span style="font-size: 14px; color: #6B7280;">any endpoint speaking the chat API</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="width: 8px; height: 8px; border-radius: 999px; background: #E4922B;"></span>
+        <span style="font-size: 15px; font-weight: 600;">Hugging Face</span>
+        <span style="font-size: 14px; color: #6B7280;">hosted inference</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CTA ================= -->
+  <div id="get" style="max-width: 1160px; margin: 0 auto; padding: 118px 40px 0 40px;">
+    <div style="border-radius: 24px; background: #E4922B; padding: 68px 56px; display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center;">
+      <h2 class="dsp" style="margin: 0; font-size: 52px; line-height: 1.02; font-weight: 800; color: #23160A; max-width: 16em;">
+        Go on. Give them something to smile at.
+      </h2>
+      <p style="margin: 0; font-size: 18px; line-height: 1.55; color: #5C3A0C; max-width: 30em;">
+        Free and GPL-2.0-or-later. Bring your own model, or run one on your own hardware.
+      </p>
+      <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; padding-top: 4px;">
+        <a href="[YOUR DOWNLOAD URL]" style="display: inline-block; background: #111827; color: #fff; font-size: 16px; font-weight: 600; padding: 16px 30px; border-radius: 10px;">Download the plugin</a>
+        <a href="[YOUR DOCS URL]" style="display: inline-block; background: rgba(255,255,255,0.55); color: #23160A; font-size: 16px; font-weight: 600; padding: 16px 26px; border-radius: 10px;">Read the docs</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <div style="max-width: 1160px; margin: 0 auto; padding: 44px 40px 64px 40px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3a9 9 0 0 0-9 9c0 2.2.8 4.2 2.1 5.7L4 21l3.6-1.2A9 9 0 1 0 12 3Z"></path>
+      </svg>
+      <span style="font-size: 14px; color: #6B7280;">AI Fun Questions &mdash; a small WordPress plugin</span>
+    </div>
+    <span class="mono" style="font-size: 12px; color: #6B7280;">GPL-2.0-or-later</span>
+  </div>
+
+</div>
+</x-dc>
+
+<script data-dc-script>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { i: 0, answer: '', revealed: false, shownAnswer: '' };
+  }
+
+  samples() {
+    return [
+      {
+        q: 'Why did the CSS file refuse to argue with the HTML?',
+        a: 'It knew it would just get overridden.',
+        h: 'Hint: think about who wins a specificity fight.'
+      },
+      {
+        q: 'Why did the database administrator leave the party early?',
+        a: 'Too many deadlocks in the kitchen.',
+        h: 'Hint: two people, one doorway, neither moving.'
+      },
+      {
+        q: 'Why did the WordPress site bring a ladder to the meeting?',
+        a: 'It heard the discussion was about higher-level plugins.',
+        h: 'Hint: it is a pun about layers.'
+      },
+      {
+        q: 'Why did the git branch feel lonely?',
+        a: 'Nobody ever merged with it.',
+        h: 'Hint: a relationship word that is also a command.'
+      }
+    ];
+  }
+
+  renderVals() {
+    const list = this.samples();
+    const item = list[this.state.i % list.length];
+
+    return {
+      question: item.q,
+      punchline: item.a,
+      hint: item.h,
+      answer: this.state.answer,
+      shownAnswer: this.state.shownAnswer,
+      revealed: this.state.revealed,
+      showHint: !this.state.revealed,
+      onAnswer: (e) => this.setState({ answer: e.target.value }),
+      onSubmit: () => this.setState({
+        revealed: true,
+        shownAnswer: this.state.answer.trim() === '' ? 'You went straight for the punchline.' : this.state.answer
+      }),
+      onNext: () => this.setState({
+        i: this.state.i + 1,
+        answer: '',
+        revealed: false,
+        shownAnswer: ''
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>
