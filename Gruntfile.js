@@ -47,6 +47,7 @@ module.exports = function ( grunt ) {
 				src: [
 					'**',
 					'!node_modules/**',
+					'!.wordpress-org/**',
 					'!ai-fun-questions/**',
 					'!.git/**',
 					'!.github/**',
@@ -56,7 +57,6 @@ module.exports = function ( grunt ) {
 					'!.DS_Store',
 					'!**/.DS_Store',
 					'!Gruntfile.js',
-					'!package.json',
 					'!package-lock.json',
 					'!*.zip',
 					'!*.map',

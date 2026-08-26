@@ -8,7 +8,7 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-AI-powered widget that generates a fresh joke on demand, on whatever subjects you choose. Nothing is stored in a question bank.
+AI-powered widget that generates a fresh joke on demand, on subjects you choose. No question bank is ever stored.
 
 == Description ==
 
@@ -68,6 +68,58 @@ For production, define secrets in `wp-config.php` rather than the database:
 
 These lines must be placed above the "That's all, stop editing" comment. Anything added after `wp-settings.php` loads is defined too late and silently ignored. A constant always overrides the stored option, and the settings screen marks any field a constant is supplying.
 
+== External services ==
+
+This plugin sends a request to a third-party AI service every time a visitor asks for a
+question. Which service is used depends on the provider you select on the settings screen.
+No visitor data is transmitted: the request contains only the plugin's own prompt, a randomly
+chosen subject, a variation key, and the model name you configured.
+
+**OpenAI-compatible**
+
+Used when the OpenAI-compatible provider is selected. The request goes to the endpoint you
+configure, which defaults to https://api.openai.com/v1/chat/completions, and carries your API
+key. Sent on every question generation.
+
+* Terms of use: https://openai.com/policies/row-terms-of-use/
+* Privacy policy: https://openai.com/policies/row-privacy-policy/
+
+Pointing the endpoint at a different OpenAI-compatible service means that service's own terms
+and privacy policy apply instead.
+
+**Hugging Face**
+
+Used when the Hugging Face provider is selected. The request goes to
+https://router.huggingface.co/v1/chat/completions and carries your access token. Sent on every
+question generation.
+
+* Terms of service: https://huggingface.co/terms-of-service
+* Privacy policy: https://huggingface.co/privacy
+
+**Ollama**
+
+Used when the Ollama provider is selected. Ollama is self-hosted software that you run
+yourself, and the request goes only to the URL you configure, which defaults to
+http://localhost:11434/api/chat. Nothing leaves your own infrastructure and no third party is
+involved.
+
+* Project site: https://ollama.com
+* License: https://github.com/ollama/ollama/blob/main/LICENSE
+
+**Why not the WordPress AI Client?**
+
+WordPress 7.0 introduced wp_ai_client_prompt(). This plugin talks to the providers directly
+because it supports self-hosted Ollama and any OpenAI-compatible endpoint you point it at,
+including local model servers, which the AI Client does not currently cover. Provider code is
+isolated behind AI_FQ_Provider_Interface, so switching later is a contained change.
+
+== Screenshots ==
+
+1. The settings screen: choose a provider, enter its credentials, pick a model.
+2. Question topics: pick the subjects questions are generated from, or leave it on Random.
+3. The widget on the front end, before the visitor answers.
+4. The widget after answering, with the punchline revealed.
+
 == Frequently Asked Questions ==
 
 = Do I need an API key? =
@@ -82,7 +134,7 @@ Common causes are a provider that is not running, a wrong URL or port, a missing
 
 = Why do I get "Please wait before requesting another question"? =
 
-You hit the plugin's rate limit. The default allowance is 5 requests per client per 60 second window. Wait for the window to roll over or raise the limit with the `ai_fq_rate_limit` filter.
+You hit one of the plugin's rate limits. There are three, checked in order: a site-wide ceiling of 120 questions per minute, a per-IP ceiling of 15 per minute, and 5 per client per minute. Wait for the window to roll over, or raise the relevant limit with the `ai_fq_rate_limit` filter.
 
 = Can I put more than one widget on a page? =
 
@@ -90,11 +142,28 @@ Yes. Each widget generates and tracks its own question. Note that every widget f
 
 = How do I change the rate limit? =
 
-Use the `ai_fq_rate_limit` filter. It receives the current limit and the bucket key, which is prefixed `generate|` for question generation and `answer|` for answer submission, so the two can be tuned separately.
+Use the `ai_fq_rate_limit` filter. It receives the current limit and the bucket key, so every tier can be tuned separately:
+
+* `generate-global` — the whole site, default 120 per minute. This is the one that caps what the plugin can spend on your AI account, so raise it deliberately.
+* `generate-ip|…` — one visitor address, default 15 per minute.
+* `generate|…` — one client, default 5 per minute.
+* `answer-ip|…` and `answer|…` — the same two tiers for answer submissions.
+
+The site-wide ceiling exists because the per-visitor limits only bound one address each. Without it, a page elsewhere on the web could make its own visitors' browsers call your endpoint, and every call would be billed to you.
+
+= My site is behind Cloudflare or a reverse proxy =
+
+Configure the `ai_fq_client_ip` filter. Without it every visitor appears to arrive from the
+proxy, so the whole site shares one per-IP allowance and the limits will fire far too early.
+Return the real client address from whichever header your proxy sets, after validating it.
+
+If the public host differs from what WordPress reports — a mapped multisite domain, or a proxy
+in front of a different internal host — also add it with the `ai_fq_allowed_origin_hosts`
+filter, or question requests will be refused as cross-origin.
 
 = Are the REST endpoints public? =
 
-Yes, intentionally, because the widget must work for anonymous visitors. Both routes are POST only. They are protected by short-lived widget tokens, question tokens bound to the requesting client, database-backed rate limiting, and a POST-only answer reveal. The punchline is never available over a GET request.
+Yes, intentionally, because the widget must work for anonymous visitors. Both routes are POST only. They are protected by short-lived widget tokens, question tokens bound to the requesting client, three tiers of database-backed rate limiting including a site-wide ceiling, and a POST-only answer reveal. Question generation also refuses requests carrying a cross-origin `Origin` header, so the endpoint cannot be driven from someone else's page. The punchline is never available over a GET request.
 
 = How do I remove a saved API key? =
 
@@ -103,6 +172,12 @@ Leaving a secret field blank keeps the existing value, so unrelated saves never 
 = Does the plugin store visitor answers? =
 
 No. Answers are not persisted. Questions are held only in a short-lived transient.
+
+= What happens when I delete the plugin? =
+
+Deleting it from the Plugins screen removes its settings, including saved API keys, and drops
+the rate-limit table. Deactivating changes nothing, so you can deactivate and reactivate
+without losing your configuration.
 
 == Changelog ==
 
