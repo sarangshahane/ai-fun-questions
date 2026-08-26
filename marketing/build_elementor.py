@@ -294,7 +294,7 @@ content.append(section([
         col([
             eyebrow("WordPress plugin &middot; Requires WP 6.4+ &middot; PHP 7.4+"),
             heading("Nobody has heard this joke before.", size=64, tag="h1", lh=0.99),
-            text("A tiny widget that asks an AI for one fresh tech riddle, right when a "
+            text("A tiny widget that asks an AI for one fresh riddle, right when a "
                  "visitor wants one. There is no joke database to run dry &mdash; every "
                  "question is written on the spot, held for ten minutes, then thrown away.",
                  size=19, lh=1.55),
@@ -382,7 +382,7 @@ places = [
     ("fas fa-desktop", "A booth screen",
      "WordCamp, a meetup, a careers fair. A laptop on a stand and something to talk about."),
     ("fas fa-newspaper", "A blog sidebar",
-     "A recurring bit of personality on a long-form tech blog, without another content chore."),
+     "A recurring bit of personality on a long-form blog, without another content chore."),
     ("fas fa-mug-hot", "An intranet break page",
      "Self-host the model with Ollama and nothing leaves the building."),
     ("fas fa-envelope-open-text", "A thank-you page",
