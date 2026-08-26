@@ -313,46 +313,71 @@ class AI_FQ_Admin {
 		}
 		?>
 		<div class="wrap ai-fq-admin">
-			<h1 class="ai-fq-admin__title">
-				<span><?php esc_html_e( 'AI Fun Questions', 'ai-fun-questions' ); ?></span>
-			</h1>
+			<div class="ai-fq-admin__header">
+				<div class="ai-fq-admin__identity">
+					<h1 class="ai-fq-admin__title"><?php esc_html_e( 'AI Fun Questions', 'ai-fun-questions' ); ?></h1>
+					<span class="ai-fq-admin__version"><?php echo esc_html( AI_FQ_VERSION ); ?></span>
+				</div>
+				<div class="ai-fq-admin__actions">
+					<span class="ai-fq-savebar__status" data-ai-fq-status>
+						<?php esc_html_e( 'All changes saved', 'ai-fun-questions' ); ?>
+					</span>
+					<button type="submit" form="ai-fq-form" class="ai-fq-button">
+						<?php esc_html_e( 'Save changes', 'ai-fun-questions' ); ?>
+					</button>
+				</div>
+			</div>
+
+			<?php
+			/*
+			 * Core's common.js relocates every .notice to sit immediately before
+			 * the first .wp-header-end. Without this marker WordPress drops the
+			 * "Settings saved." notice straight after the <h1>, which is not
+			 * where this layout wants it.
+			 */
+			?>
+			<hr class="wp-header-end">
 
 			<div class="ai-fq-note">
 				<?php self::icon( 'info' ); ?>
 				<p><?php esc_html_e( 'No question bank is stored. Each question is generated on demand and only the current question is temporarily cached for the visitor session.', 'ai-fun-questions' ); ?></p>
 			</div>
 
-			<form method="post" action="options.php" class="ai-fq-form" data-ai-fq-form>
+			<form method="post" action="options.php" class="ai-fq-form" id="ai-fq-form" data-ai-fq-form>
 				<?php settings_fields( 'ai_fq_settings' ); ?>
 
 				<div class="ai-fq-form__main">
-					<fieldset class="ai-fq-providers">
-						<legend class="ai-fq-providers__legend"><?php esc_html_e( 'AI Provider', 'ai-fun-questions' ); ?></legend>
+					<section class="ai-fq-card ai-fq-card--providers" id="ai-fq-section-provider">
+						<h2 class="ai-fq-card__title" id="ai-fq-provider-heading"><?php esc_html_e( 'AI provider', 'ai-fun-questions' ); ?></h2>
+						<p class="ai-fq-card__text"><?php esc_html_e( 'Where questions are generated. Credentials for the others stay saved if you switch.', 'ai-fun-questions' ); ?></p>
 
-						<div class="ai-fq-providers__grid">
-							<?php foreach ( $providers as $key => $provider ) : ?>
-								<label class="ai-fq-provider" for="ai-fq-provider-<?php echo esc_attr( $key ); ?>">
-									<input
-										type="radio"
-										class="ai-fq-provider__input"
-										id="ai-fq-provider-<?php echo esc_attr( $key ); ?>"
-										name="ai_fq_provider"
-										value="<?php echo esc_attr( $key ); ?>"
-										data-ai-fq-provider-input
-										<?php checked( $active, $key ); ?>
-									>
-									<span class="ai-fq-provider__card">
-										<span class="ai-fq-provider__top">
-											<span class="ai-fq-provider__icon"><?php self::icon( $key ); ?></span>
-											<span class="ai-fq-provider__mark" aria-hidden="true"></span>
+						<fieldset class="ai-fq-providers" aria-labelledby="ai-fq-provider-heading">
+
+							<div class="ai-fq-providers__grid">
+								<?php foreach ( $providers as $key => $provider ) : ?>
+									<label class="ai-fq-provider" for="ai-fq-provider-<?php echo esc_attr( $key ); ?>">
+										<input
+											type="radio"
+											class="ai-fq-provider__input"
+											id="ai-fq-provider-<?php echo esc_attr( $key ); ?>"
+											name="ai_fq_provider"
+											value="<?php echo esc_attr( $key ); ?>"
+											data-ai-fq-provider-input
+											<?php checked( $active, $key ); ?>
+										>
+										<span class="ai-fq-provider__card">
+											<span class="ai-fq-provider__top">
+												<span class="ai-fq-provider__icon"><?php self::icon( $key ); ?></span>
+												<span class="ai-fq-provider__mark" aria-hidden="true"></span>
+											</span>
+											<span class="ai-fq-provider__name"><?php echo esc_html( $provider['label'] ); ?></span>
+											<span class="ai-fq-provider__subtitle"><?php echo esc_html( $provider['subtitle'] ); ?></span>
 										</span>
-										<span class="ai-fq-provider__name"><?php echo esc_html( $provider['label'] ); ?></span>
-										<span class="ai-fq-provider__subtitle"><?php echo esc_html( $provider['subtitle'] ); ?></span>
-									</span>
-								</label>
-							<?php endforeach; ?>
-						</div>
-					</fieldset>
+									</label>
+								<?php endforeach; ?>
+							</div>
+						</fieldset>
+					</section>
 
 					<?php
 					foreach ( $providers as $key => $provider ) {
@@ -364,28 +389,33 @@ class AI_FQ_Admin {
 				</div>
 
 				<aside class="ai-fq-form__aside">
+					<nav class="ai-fq-jump" aria-label="<?php esc_attr_e( 'On this page', 'ai-fun-questions' ); ?>">
+						<h2 class="ai-fq-jump__title"><?php esc_html_e( 'On this page', 'ai-fun-questions' ); ?></h2>
+						<ul>
+							<li><a href="#ai-fq-section-provider"><?php esc_html_e( 'AI provider', 'ai-fun-questions' ); ?></a></li>
+							<li><a href="#ai-fq-section-connection"><?php esc_html_e( 'Connection', 'ai-fun-questions' ); ?></a></li>
+							<li><a href="#ai-fq-section-topics"><?php esc_html_e( 'Question topics', 'ai-fun-questions' ); ?></a></li>
+							<li><a href="#ai-fq-section-usage"><?php esc_html_e( 'Usage', 'ai-fun-questions' ); ?></a></li>
+						</ul>
+					</nav>
+
+					<div class="ai-fq-card ai-fq-card--usage" id="ai-fq-section-usage">
+						<h2 class="ai-fq-card__title"><?php esc_html_e( 'Usage', 'ai-fun-questions' ); ?></h2>
+						<p class="ai-fq-card__text"><?php esc_html_e( 'Add this shortcode anywhere:', 'ai-fun-questions' ); ?></p>
+						<code class="ai-fq-code">[ai_fun_question]</code>
+					</div>
+
 					<div class="ai-fq-card ai-fq-card--notes">
 						<h2 class="ai-fq-card__title"><?php esc_html_e( 'Production notes', 'ai-fun-questions' ); ?></h2>
 						<ul class="ai-fq-notes-list">
-							<li><?php esc_html_e( 'The public widget is intentionally unauthenticated. Rate limiting and short-lived tokens protect the generation/answer flow.', 'ai-fun-questions' ); ?></li>
-							<li><?php esc_html_e( 'AI provider credentials should preferably be defined in wp-config.php for production sites.', 'ai-fun-questions' ); ?></li>
-							<li><?php esc_html_e( 'AI output is validated as plain text and constrained to predefined categories and maximum lengths.', 'ai-fun-questions' ); ?></li>
+							<li><?php esc_html_e( 'Questions are generated on demand. Nothing is stored in a question bank.', 'ai-fun-questions' ); ?></li>
+							<li><?php esc_html_e( 'The public widget is intentionally unauthenticated.', 'ai-fun-questions' ); ?></li>
+							<li><?php esc_html_e( 'Prefer credentials in wp-config.php.', 'ai-fun-questions' ); ?></li>
+							<li><?php esc_html_e( 'AI output is validated server-side.', 'ai-fun-questions' ); ?></li>
 						</ul>
-
-						<h2 class="ai-fq-card__title"><?php esc_html_e( 'Frontend usage', 'ai-fun-questions' ); ?></h2>
-						<p class="ai-fq-card__text"><?php esc_html_e( 'Add this shortcode to any page, post, template, or shortcode-enabled area:', 'ai-fun-questions' ); ?></p>
-						<code class="ai-fq-code">[ai_fun_question]</code>
 					</div>
 				</aside>
 
-				<div class="ai-fq-savebar">
-					<span class="ai-fq-savebar__status" data-ai-fq-status>
-						<?php esc_html_e( 'All changes saved', 'ai-fun-questions' ); ?>
-					</span>
-					<button type="submit" class="ai-fq-button">
-						<?php esc_html_e( 'Save Changes', 'ai-fun-questions' ); ?>
-					</button>
-				</div>
 			</form>
 		</div>
 		<?php
@@ -400,7 +430,7 @@ class AI_FQ_Admin {
 		$is_active = ( $key === $active );
 		$classes   = 'ai-fq-panel' . ( $is_active ? ' is-active' : '' );
 		?>
-		<section class="<?php echo esc_attr( $classes ); ?>" data-ai-fq-panel="<?php echo esc_attr( $key ); ?>">
+		<section class="<?php echo esc_attr( $classes ); ?>" data-ai-fq-panel="<?php echo esc_attr( $key ); ?>"<?php echo $is_active ? ' id="ai-fq-section-connection"' : ''; ?>>
 			<header class="ai-fq-panel__header">
 				<h2 class="ai-fq-panel__title"><?php echo esc_html( $provider['label'] ); ?></h2>
 				<span class="ai-fq-pill ai-fq-pill--state" data-ai-fq-panel-state>
@@ -412,6 +442,8 @@ class AI_FQ_Admin {
 				</span>
 			</header>
 
+			<p class="ai-fq-card__text"><?php esc_html_e( 'Credentials and model for the selected provider.', 'ai-fun-questions' ); ?></p>
+
 			<div class="ai-fq-panel__grid">
 				<?php
 				switch ( $key ) {
@@ -419,7 +451,7 @@ class AI_FQ_Admin {
 						self::render_field(
 							array(
 								'name'        => 'ai_fq_ollama_url',
-								'label'       => __( 'Ollama URL', 'ai-fun-questions' ),
+								'label'       => __( 'URL', 'ai-fun-questions' ),
 								'type'        => 'url',
 								'value'       => get_option( 'ai_fq_ollama_url', 'http://localhost:11434/api/chat' ),
 								/* translators: %s: default Ollama endpoint URL. */
@@ -429,7 +461,7 @@ class AI_FQ_Admin {
 						self::render_field(
 							array(
 								'name'        => 'ai_fq_ollama_model',
-								'label'       => __( 'Ollama Model', 'ai-fun-questions' ),
+								'label'       => __( 'Model', 'ai-fun-questions' ),
 								'type'        => 'select',
 								'choices'     => self::models( 'ollama' ),
 								'value'       => get_option( 'ai_fq_ollama_model', 'gemma3' ),
@@ -442,7 +474,7 @@ class AI_FQ_Admin {
 						self::render_field(
 							array(
 								'name'        => 'ai_fq_hf_token',
-								'label'       => __( 'Hugging Face Token', 'ai-fun-questions' ),
+								'label'       => __( 'Token', 'ai-fun-questions' ),
 								'type'        => 'password',
 								'secret'      => true,
 								'constant'    => 'AI_FQ_HF_TOKEN',
@@ -453,7 +485,7 @@ class AI_FQ_Admin {
 						self::render_field(
 							array(
 								'name'        => 'ai_fq_hf_model',
-								'label'       => __( 'Hugging Face Model', 'ai-fun-questions' ),
+								'label'       => __( 'Model', 'ai-fun-questions' ),
 								'type'        => 'select',
 								'choices'     => self::models( 'huggingface' ),
 								'value'       => get_option( 'ai_fq_hf_model', 'Qwen/Qwen3-4B-Instruct-2507' ),
@@ -466,7 +498,7 @@ class AI_FQ_Admin {
 						self::render_field(
 							array(
 								'name'  => 'ai_fq_openai_endpoint',
-								'label' => __( 'OpenAI-compatible Endpoint', 'ai-fun-questions' ),
+								'label' => __( 'Endpoint', 'ai-fun-questions' ),
 								'type'  => 'url',
 								'value' => get_option( 'ai_fq_openai_endpoint', 'https://api.openai.com/v1/chat/completions' ),
 								'full'  => true,
@@ -475,7 +507,7 @@ class AI_FQ_Admin {
 						self::render_field(
 							array(
 								'name'        => 'ai_fq_openai_key',
-								'label'       => __( 'OpenAI-compatible API Key', 'ai-fun-questions' ),
+								'label'       => __( 'API key', 'ai-fun-questions' ),
 								'type'        => 'password',
 								'secret'      => true,
 								'constant'    => 'AI_FQ_OPENAI_KEY',
@@ -486,11 +518,11 @@ class AI_FQ_Admin {
 						self::render_field(
 							array(
 								'name'        => 'ai_fq_openai_model',
-								'label'       => __( 'OpenAI-compatible Model', 'ai-fun-questions' ),
+								'label'       => __( 'Model', 'ai-fun-questions' ),
 								'type'        => 'select',
 								'choices'     => self::models( 'openai' ),
 								'value'       => get_option( 'ai_fq_openai_model', 'gpt-4o-mini' ),
-								'description' => __( 'Listed models assume the default OpenAI endpoint. Pointing the endpoint elsewhere means using that service\'s own model names.', 'ai-fun-questions' ),
+								'description' => __( 'Listed models assume the default OpenAI endpoint.', 'ai-fun-questions' ),
 							)
 						);
 						break;
@@ -516,9 +548,9 @@ class AI_FQ_Admin {
 		$selected  = is_array( $selected ) ? $selected : array( $random );
 		$is_random = in_array( $random, $selected, true );
 		?>
-		<section class="ai-fq-card ai-fq-card--topics">
+		<section class="ai-fq-card ai-fq-card--topics" id="ai-fq-section-topics">
 			<h2 class="ai-fq-card__title"><?php esc_html_e( 'Question topics', 'ai-fun-questions' ); ?></h2>
-			<p class="ai-fq-card__text"><?php esc_html_e( 'What the generated questions are about. Random hands the choice to the AI, which can pick any subject at all. Select topics instead to hold it to those.', 'ai-fun-questions' ); ?></p>
+			<p class="ai-fq-card__text"><?php esc_html_e( 'What the questions are about. Random hands the choice to the AI, which can pick any subject at all.', 'ai-fun-questions' ); ?></p>
 
 			<fieldset class="ai-fq-topics" data-ai-fq-topics>
 				<legend class="screen-reader-text"><?php esc_html_e( 'Question topics', 'ai-fun-questions' ); ?></legend>
@@ -607,7 +639,7 @@ class AI_FQ_Admin {
 		if ( $args['secret'] && $from_constant ) {
 			$description = sprintf(
 				/* translators: %s: PHP constant name. */
-				__( 'Defined via %s in wp-config.php. The field below is ignored.', 'ai-fun-questions' ),
+				__( 'Defined via %s in wp-config.php. This field is ignored.', 'ai-fun-questions' ),
 				$args['constant']
 			);
 		}
