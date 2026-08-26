@@ -117,5 +117,37 @@
 		});
 	});
 
+	/*
+	 * Random and the individual topics are mutually exclusive. The sanitizer
+	 * already enforces that on save; this only makes the form agree before
+	 * the round-trip, so the selection never reads as something it is not.
+	 */
+	const topicsField = form.querySelector('[data-ai-fq-topics]');
+
+	if (topicsField) {
+		const randomTopic = topicsField.querySelector('[data-ai-fq-topic-random]');
+		const topics = topicsField.querySelectorAll('[data-ai-fq-topic]');
+
+		if (randomTopic) {
+			randomTopic.addEventListener('change', () => {
+				if (!randomTopic.checked) {
+					return;
+				}
+
+				topics.forEach((topic) => {
+					topic.checked = false;
+				});
+			});
+
+			topics.forEach((topic) => {
+				topic.addEventListener('change', () => {
+					if (topic.checked) {
+						randomTopic.checked = false;
+					}
+				});
+			});
+		}
+	}
+
 	syncPanels();
 })();

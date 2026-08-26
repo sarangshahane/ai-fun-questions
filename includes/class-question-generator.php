@@ -12,9 +12,9 @@ class AI_FQ_Question_Generator {
 	const MAX_HINT_LENGTH     = 200;
 
 	const PROMPT = <<<'PROMPT'
-You are a witty tech joke generator.
+You are a witty joke generator.
 
-Generate exactly ONE original funny question based on computers, programming, WordPress, internet, AI, or technology.
+Generate exactly ONE original funny question about the subject named in the next message.
 
 Requirements:
 - The joke must be family-friendly.
@@ -63,39 +63,171 @@ PROMPT;
 	}
 
 	/**
-	 * Subjects the user turn rotates through.
+	 * Subjects the user turn rotates through, grouped for the settings screen.
 	 *
-	 * Not a question bank: these steer the model's topic, they are not jokes
-	 * and no generated content is stored.
+	 * Not a question bank: these steer the model's subject, they are not jokes
+	 * and no generated content is stored. The phrases are dropped into an
+	 * English prompt, so they are deliberately not translated — the slugs are
+	 * the stable half and must not change once saved settings exist.
+	 *
+	 * Technology is one group among several on purpose. Most WordPress sites
+	 * are not tech sites, and a bakery wants a joke about baking, not a joke
+	 * about baking rewritten as a deploy.
+	 *
+	 * @return array Group label => ( slug => prompt phrase ).
 	 */
-	const TOPICS = array(
-		'programming languages',
-		'debugging',
-		'WordPress',
-		'databases',
-		'version control',
-		'the command line',
-		'artificial intelligence',
-		'networking',
-		'web browsers',
-		'cloud hosting',
-		'passwords and security',
-		'hardware',
-	);
+	public static function topic_groups() {
+		$groups = array(
+			/* translators: Topic group label on the settings screen. */
+			__( 'Technology', 'ai-fun-questions' )       => array(
+				'programming-languages'   => 'programming languages',
+				'debugging'               => 'debugging',
+				'wordpress'               => 'WordPress',
+				'databases'               => 'databases',
+				'version-control'         => 'version control',
+				'command-line'            => 'the command line',
+				'artificial-intelligence' => 'artificial intelligence',
+				'networking'              => 'networking',
+				'web-browsers'            => 'web browsers',
+				'cloud-hosting'           => 'cloud hosting',
+				'security'                => 'passwords and security',
+				'hardware'                => 'hardware',
+			),
+			/* translators: Topic group label on the settings screen. */
+			__( 'Everyday life', 'ai-fun-questions' )    => array(
+				'weather'                 => 'the weather',
+				'mondays'                 => 'Mondays',
+				'housework'               => 'housework',
+				'getting-up'              => 'getting out of bed',
+			),
+			/* translators: Topic group label on the settings screen. */
+			__( 'Food and drink', 'ai-fun-questions' )   => array(
+				'coffee'                  => 'coffee',
+				'baking'                  => 'baking',
+				'pizza'                   => 'pizza',
+				'cooking-disasters'       => 'cooking disasters',
+			),
+			/* translators: Topic group label on the settings screen. */
+			__( 'Animals', 'ai-fun-questions' )          => array(
+				'cats'                    => 'cats',
+				'dogs'                    => 'dogs',
+				'birds'                   => 'birds',
+				'sea-creatures'           => 'sea creatures',
+			),
+			/* translators: Topic group label on the settings screen. */
+			__( 'Work and office', 'ai-fun-questions' )  => array(
+				'meetings'                => 'meetings',
+				'email'                   => 'email',
+				'deadlines'               => 'deadlines',
+				'job-interviews'          => 'job interviews',
+			),
+			/* translators: Topic group label on the settings screen. */
+			__( 'Travel and places', 'ai-fun-questions' ) => array(
+				'airports'                => 'airports',
+				'road-trips'              => 'road trips',
+				'camping'                 => 'camping',
+				'public-transport'        => 'public transport',
+			),
+			/* translators: Topic group label on the settings screen. */
+			__( 'Sport and hobbies', 'ai-fun-questions' ) => array(
+				'football'                => 'football',
+				'the-gym'                 => 'the gym',
+				'gardening'               => 'gardening',
+				'board-games'             => 'board games',
+			),
+		);
+
+		/**
+		 * Filters the topic groups offered on the settings screen.
+		 *
+		 * @param array $groups Group label => ( slug => prompt phrase ).
+		 */
+		return apply_filters( 'ai_fq_topic_groups', $groups );
+	}
 
 	/**
-	 * Second variation axis, crossed with TOPICS.
+	 * Domain examples for the unrestricted prompt, shuffled per request.
+	 *
+	 * Deliberately broader than the topic catalogue and never used to pick the
+	 * subject — they only stop the model defaulting to whatever it thought of
+	 * first, which was reliably a computer.
+	 */
+	const RANDOM_EXAMPLES = array(
+		'food',
+		'animals',
+		'sport',
+		'travel',
+		'the weather',
+		'music',
+		'school',
+		'money',
+		'housework',
+		'the seaside',
+		'gardening',
+		'family life',
+		'shopping',
+		'technology',
+		'science',
+		'films',
+	);
+
+	/** Option value meaning "no restriction, rotate through everything". */
+	const TOPIC_RANDOM = 'random';
+
+	/**
+	 * The whole catalogue, flattened — group labels dropped.
+	 *
+	 * @return array Slug => prompt phrase.
+	 */
+	public static function topics() {
+		$topics = array();
+
+		foreach ( self::topic_groups() as $group ) {
+			$topics += $group;
+		}
+
+		return $topics;
+	}
+
+	/**
+	 * The topics this site generates from.
+	 *
+	 * An EMPTY array is the meaningful case, not an error: it is Random, and
+	 * Random is not "rotate through the twelve" — it is no subject constraint
+	 * at all. The model then picks its own subject, including ones this
+	 * catalogue does not list. Anything unusable (missing option, corrupt
+	 * value, slugs that have drifted out of the catalogue) lands there too, so
+	 * a site with a broken selection keeps generating rather than stopping.
+	 *
+	 * @return array Slug => prompt phrase. Empty means unrestricted.
+	 */
+	public static function active_topics() {
+		$selected = get_option( 'ai_fq_topics', array( self::TOPIC_RANDOM ) );
+
+		if ( ! is_array( $selected ) || in_array( self::TOPIC_RANDOM, $selected, true ) ) {
+			return array();
+		}
+
+		return array_intersect_key( self::topics(), array_flip( $selected ) );
+	}
+
+	/**
+	 * Second variation axis, crossed with the topic.
 	 *
 	 * One axis was not enough: two requests that drew the same topic still came
 	 * back with the same joke, because the model has a favourite one per
 	 * subject. Crossing topic with an angle makes that collision far rarer.
+	 *
+	 * Every angle is deliberately domain-neutral. Three of them used to name
+	 * software, error messages and technology, which dragged tech into jokes
+	 * about cats and baking once the catalogue stopped being tech-only.
 	 */
 	const ANGLES = array(
-		'a pun on a technical term',
-		'a misunderstanding between two pieces of software',
+		'a pun on a word from that subject',
+		'a misunderstanding between two things involved in it',
 		'a workplace situation',
-		'an everyday object compared to technology',
-		'a play on an error message',
+		'an everyday object behaving like a person',
+		'a play on a familiar phrase',
 		'a relationship or breakup framing',
 		'an exaggerated boast',
 		'a double meaning in ordinary English',
@@ -156,14 +288,39 @@ PROMPT;
 	 * @return string
 	 */
 	private static function user_prompt() {
-		$topic = self::TOPICS[ array_rand( self::TOPICS ) ];
-		$angle = self::ANGLES[ array_rand( self::ANGLES ) ];
+		$topics = self::active_topics();
+		$angle  = self::ANGLES[ array_rand( self::ANGLES ) ];
+		$key    = wp_generate_password( 10, false, false );
+
+		/*
+		 * Unrestricted: hand the subject choice to the model instead of naming
+		 * one, so Random can reach subjects the catalogue never lists. The
+		 * angle and the variation key still do the anti-collision work that
+		 * naming a topic used to do.
+		 */
+		if ( empty( $topics ) ) {
+			/*
+			 * The examples are shuffled per request. Left in a fixed order the
+			 * model kept picking the first familiar one and Random came back
+			 * as a computer joke nearly every time — unconstrained in theory,
+			 * not in practice.
+			 */
+			$examples = self::RANDOM_EXAMPLES;
+			shuffle( $examples );
+
+			return sprintf(
+				'Generate one fresh question now. Choose the subject yourself — anything at all, for instance %1$s, or something else entirely. It does not have to be one of the usual few, so surprise me. Build it on %2$s. Variation key %3$s — never mention this key, and do not repeat a joke you would usually tell.',
+				implode( ', ', array_slice( $examples, 0, 4 ) ),
+				$angle,
+				$key
+			);
+		}
 
 		return sprintf(
 			'Generate one fresh question now. Make it about %1$s, built on %2$s. Variation key %3$s — never mention this key, and do not repeat a joke you would usually tell about this subject.',
-			$topic,
+			$topics[ array_rand( $topics ) ],
 			$angle,
-			wp_generate_password( 10, false, false )
+			$key
 		);
 	}
 
@@ -230,6 +387,11 @@ PROMPT;
 			);
 		}
 
+		/*
+		 * Still a closed list — AI output stays untrusted — but no longer a
+		 * tech-only one, and an unrecognised category now falls back to
+		 * 'general' rather than mislabelling a baking joke as technology.
+		 */
 		$allowed_categories = array(
 			'computer',
 			'programming',
@@ -238,10 +400,22 @@ PROMPT;
 			'ai',
 			'technology',
 			'tech',
+			'everyday',
+			'life',
+			'food',
+			'drink',
+			'animals',
+			'work',
+			'office',
+			'travel',
+			'places',
+			'sport',
+			'hobbies',
+			'general',
 		);
 
 		if ( ! in_array( $category, $allowed_categories, true ) ) {
-			$category = 'technology';
+			$category = 'general';
 		}
 
 		return array(

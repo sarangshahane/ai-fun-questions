@@ -69,6 +69,7 @@ class AI_FQ_Admin {
 	public static function register_settings() {
 		$fields = array(
 			'ai_fq_provider'        => array( __CLASS__, 'sanitize_provider' ),
+			'ai_fq_topics'          => array( __CLASS__, 'sanitize_topics' ),
 			'ai_fq_ollama_url'      => array( __CLASS__, 'sanitize_url_field' ),
 			'ai_fq_ollama_model'    => array( __CLASS__, 'sanitize_ollama_model' ),
 			'ai_fq_hf_token'        => array( __CLASS__, 'sanitize_hf_token' ),
@@ -195,6 +196,30 @@ class AI_FQ_Admin {
 		$value = sanitize_text_field( (string) $value );
 
 		return array_key_exists( $value, self::providers() ) ? $value : 'ollama';
+	}
+
+	/**
+	 * Topics are stored as catalogue slugs. Anything unknown is dropped, and an
+	 * empty or Random selection collapses to the Random sentinel so the saved
+	 * value always says plainly what the generator will do.
+	 */
+	public static function sanitize_topics( $value ) {
+		$random = array( AI_FQ_Question_Generator::TOPIC_RANDOM );
+
+		if ( ! is_array( $value ) ) {
+			return $random;
+		}
+
+		$value = array_map( 'sanitize_key', $value );
+
+		if ( in_array( AI_FQ_Question_Generator::TOPIC_RANDOM, $value, true ) ) {
+			return $random;
+		}
+
+		$known = array_keys( AI_FQ_Question_Generator::topics() );
+		$value = array_values( array_intersect( $value, $known ) );
+
+		return empty( $value ) ? $random : $value;
 	}
 
 	public static function sanitize_url_field( $value ) {
@@ -333,6 +358,8 @@ class AI_FQ_Admin {
 					foreach ( $providers as $key => $provider ) {
 						self::render_panel( $key, $provider, $active );
 					}
+
+					self::render_topics();
 					?>
 				</div>
 
@@ -475,6 +502,82 @@ class AI_FQ_Admin {
 	}
 
 	/**
+	 * Topic picker. Provider-independent, so it sits in its own card rather
+	 * than inside any provider panel.
+	 *
+	 * Chips are labels wrapping a visually-hidden checkbox, the same pattern
+	 * the provider cards use: the group stays a real checkbox group, so it
+	 * submits and saves with JavaScript off.
+	 */
+	private static function render_topics() {
+		$groups    = AI_FQ_Question_Generator::topic_groups();
+		$random    = AI_FQ_Question_Generator::TOPIC_RANDOM;
+		$selected  = get_option( 'ai_fq_topics', array( $random ) );
+		$selected  = is_array( $selected ) ? $selected : array( $random );
+		$is_random = in_array( $random, $selected, true );
+		?>
+		<section class="ai-fq-card ai-fq-card--topics">
+			<h2 class="ai-fq-card__title"><?php esc_html_e( 'Question topics', 'ai-fun-questions' ); ?></h2>
+			<p class="ai-fq-card__text"><?php esc_html_e( 'What the generated questions are about. Random hands the choice to the AI, which can pick any subject at all. Select topics instead to hold it to those.', 'ai-fun-questions' ); ?></p>
+
+			<fieldset class="ai-fq-topics" data-ai-fq-topics>
+				<legend class="screen-reader-text"><?php esc_html_e( 'Question topics', 'ai-fun-questions' ); ?></legend>
+
+				<label class="ai-fq-topic-random" for="ai-fq-topic-<?php echo esc_attr( $random ); ?>">
+					<input
+						type="checkbox"
+						class="ai-fq-topic__input"
+						id="ai-fq-topic-<?php echo esc_attr( $random ); ?>"
+						name="ai_fq_topics[]"
+						value="<?php echo esc_attr( $random ); ?>"
+						data-ai-fq-topic-random
+						<?php checked( $is_random ); ?>
+					>
+					<span class="ai-fq-topic-random__row">
+						<span class="ai-fq-topic-random__mark" aria-hidden="true"></span>
+						<span class="ai-fq-topic-random__text">
+							<span class="ai-fq-topic-random__name"><?php esc_html_e( 'Random', 'ai-fun-questions' ); ?></span>
+							<span class="ai-fq-topic-random__hint"><?php esc_html_e( 'Any subject at all — not just the ones listed below', 'ai-fun-questions' ); ?></span>
+						</span>
+					</span>
+				</label>
+
+				<div class="ai-fq-topics__groups">
+					<?php foreach ( $groups as $label => $topics ) : ?>
+						<div class="ai-fq-topics__group">
+							<span class="ai-fq-topics__group-label"><?php echo esc_html( $label ); ?></span>
+							<div class="ai-fq-topics__grid">
+								<?php foreach ( $topics as $slug => $phrase ) : ?>
+									<label class="ai-fq-topic" for="ai-fq-topic-<?php echo esc_attr( $slug ); ?>">
+										<input
+											type="checkbox"
+											class="ai-fq-topic__input"
+											id="ai-fq-topic-<?php echo esc_attr( $slug ); ?>"
+											name="ai_fq_topics[]"
+											value="<?php echo esc_attr( $slug ); ?>"
+											data-ai-fq-topic
+											<?php checked( ! $is_random && in_array( $slug, $selected, true ) ); ?>
+										>
+										<span class="ai-fq-topic__chip">
+											<?php self::icon( 'check' ); ?>
+											<span><?php echo esc_html( ucfirst( $phrase ) ); ?></span>
+										</span>
+									</label>
+								<?php endforeach; ?>
+							</div>
+						</div>
+					<?php endforeach; ?>
+				</div>
+			</fieldset>
+
+			<p class="ai-fq-field__description">
+				<?php esc_html_e( 'Choosing Random ignores the individual topics. With nothing selected, Random is used.', 'ai-fun-questions' ); ?>
+			</p>
+		</section>
+		<?php
+	}
+
+	/**
 	 * Secret fields never render their stored value; a placeholder only signals
 	 * that something is saved.
 	 */
@@ -609,6 +712,7 @@ class AI_FQ_Admin {
 	 */
 	private static function icon( $name ) {
 		$icons = array(
+			'check'       => '<path d="m5 12.5 5 5 9-11"/>',
 			'info'        => '<circle cx="12" cy="12" r="9"/><path d="M12 11.2v4.6"/><circle cx="12" cy="8.1" r="1" fill="currentColor" stroke="none"/>',
 			'ollama'      => '<rect x="3" y="7" width="18" height="11" rx="4.5"/><circle cx="9" cy="12.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="15" cy="12.5" r="1.5" fill="currentColor" stroke="none"/>',
 			'huggingface' => '<circle cx="12" cy="12" r="9"/><path d="M8.4 14.2c.9 1.3 2.1 1.9 3.6 1.9s2.7-.6 3.6-1.9"/><circle cx="9.3" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="14.7" cy="10" r="1" fill="currentColor" stroke="none"/>',
