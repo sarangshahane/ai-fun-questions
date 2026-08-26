@@ -2,7 +2,7 @@
 
 ## Provider Architecture
 
-The POC uses a common interface:
+The plugin uses a common interface:
 
 ```php
 interface AI_FQ_Provider_Interface {
@@ -30,7 +30,7 @@ If WordPress runs inside Docker, a VM, or on a remote server, `localhost` is rel
 
 ## Hugging Face
 
-The POC uses an OpenAI-compatible chat-completion endpoint and sends a bearer token server-side.
+The plugin uses an OpenAI-compatible chat-completion endpoint and sends a bearer token server-side.
 
 Configure:
 
@@ -41,7 +41,7 @@ The token must remain server-side and must never be passed to frontend JavaScrip
 
 ## OpenAI-Compatible
 
-The POC accepts a configurable endpoint, API key, and model.
+The plugin accepts a configurable endpoint, API key, and model.
 
 This is intentionally generic so the same adapter can be used with services that expose a compatible chat-completion API.
 

@@ -92,7 +92,7 @@ add_filter( 'ai_fq_allow_remote_ollama', '__return_true' );
 | Setting | Option | Default |
 | --- | --- | --- |
 | Hugging Face Token | `ai_fq_hf_token` | — |
-| Hugging Face Model | `ai_fq_hf_model` | `google/gemma-2-2b-it` |
+| Hugging Face Model | `ai_fq_hf_model` | `Qwen/Qwen3-4B-Instruct-2507` |
 
 Requests go to `https://router.huggingface.co/v1/chat/completions`. Use a model available through Hugging Face Inference Providers.
 
@@ -232,6 +232,6 @@ See `docs/testing.md` for the manual test checklist.
 
 ---
 
-## POC scope
+## Scope
 
 This project intentionally remains small and modular. It does not include analytics, a question-management UI, user accounts, persistent answer history, or a permanent question bank.

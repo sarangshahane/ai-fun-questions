@@ -49,7 +49,7 @@ Do not expose debug output on a public site.
 - Use WordPress escaping and sanitization APIs.
 - Return `WP_Error` for expected API failures.
 - Keep provider-specific logic isolated.
-- Avoid introducing a framework for this small POC.
+- Avoid introducing a framework for this small widget.
 
 ## Documentation Rule
 

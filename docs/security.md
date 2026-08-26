@@ -48,6 +48,6 @@ The server validates the temporary question state before returning the punchline
 
 ## Abuse
 
-The current rate limiter is transient-based. This is appropriate for a low-volume POC/small site.
+The current rate limiter is transient-based. This is appropriate for a low-volume or small site.
 
 For large or distributed deployments, use a shared object-cache or dedicated rate-limit service.

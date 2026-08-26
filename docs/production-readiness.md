@@ -2,7 +2,7 @@
 
 ## Current status
 
-This version is suitable as a small production-oriented POC, but it still depends on the selected AI provider's uptime, limits, model quality, and infrastructure.
+This version is production-oriented, but it still depends on the selected AI provider's uptime, limits, model quality, and infrastructure.
 
 ## Security controls
 
@@ -29,7 +29,7 @@ Do not commit these values to source control.
 
 ## Remaining operational considerations
 
-For high-traffic deployments, replace transient-based rate limiting with a shared persistent object-cache or dedicated rate-limit store. WordPress transients are adequate for the POC and low-volume usage but are not a perfect distributed rate limiter.
+For high-traffic deployments, replace transient-based rate limiting with a shared persistent object-cache or dedicated rate-limit store. WordPress transients are adequate for low-volume usage but are not a perfect distributed rate limiter.
 
 For a public site, consider adding analytics, abuse detection, bot protection, provider failover, and a configurable maximum generation budget.
 
