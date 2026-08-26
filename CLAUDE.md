@@ -39,6 +39,14 @@ class AI_FQ_Example_Provider implements AI_FQ_Provider_Interface {
 
 Register the provider in `AI_FQ_Question_Generator::get_provider()`.
 
+### Admin notices
+
+`render_page()` prints `<hr class="wp-header-end">` directly after the header
+row. Core's `common.js` relocates every `.notice` to sit immediately before the
+first `.wp-header-end`; without that marker WordPress drops "Settings saved."
+straight after the `<h1>`. Move or remove the marker and the notice moves with
+it.
+
 ### Frontend
 
 The frontend is vanilla JavaScript. Do not add a framework for this small widget unless there is a demonstrated requirement.
