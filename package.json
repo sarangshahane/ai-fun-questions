@@ -1,7 +1,7 @@
 {
 	"name": "ai-fun-questions",
 	"version": "1.0.0",
-	"description": "AI-powered fun tech questions that are generated on demand.",
+	"description": "AI-powered fun questions that are generated on demand.",
 	"author": "Sarang Shahane",
 	"license": "GPL-2.0-or-later",
 	"private": true,

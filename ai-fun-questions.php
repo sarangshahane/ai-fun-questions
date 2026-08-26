@@ -2,7 +2,7 @@
 /**
  * Plugin Name: AI Fun Questions
  * Plugin URI:  https://github.com/sarangshahane/ai-fun-questions
- * Description: AI-powered fun tech questions that are generated on demand.
+ * Description: AI-powered fun questions that are generated on demand.
  * Version:     1.0.0
  * Author:      Sarang Shahane
  * Author URI:  https://github.com/sarangshahane

@@ -8,11 +8,13 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-AI-powered widget that generates a fresh technology joke on demand. Nothing is stored in a question bank.
+AI-powered widget that generates a fresh joke on demand, on whatever subjects you choose. Nothing is stored in a question bank.
 
 == Description ==
 
-AI Fun Questions adds a shortcode widget that asks visitors a fresh, AI-generated technology riddle, lets them type an answer, and then reveals the punchline.
+AI Fun Questions adds a shortcode widget that asks visitors a fresh, AI-generated riddle, lets them type an answer, and then reveals the punchline.
+
+Pick the subjects it draws on — technology, everyday life, food, animals, work, travel, sport — or leave it on Random and let the AI choose anything at all.
 
 There is no question bank. Every question is generated live by the AI provider you configure, held briefly in a transient, and then discarded.
 
