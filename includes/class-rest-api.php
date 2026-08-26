@@ -63,7 +63,37 @@ class AI_FQ_REST_API {
 		$bucket = 'generate|' . self::client_hash();
 
 		/*
-		 * Charge the per-IP ceiling first. The bucket above mixes in the
+		 * A cross-origin caller is not this site's widget. Browsers always send
+		 * Origin on a cross-origin POST, so this rejects a fetch() planted in
+		 * someone else's page — the variant that spends other people's IP
+		 * allowances — while same-origin widget traffic is unaffected.
+		 */
+		if ( ! self::same_origin( $request ) ) {
+			return new WP_Error(
+				'ai_fq_bad_origin',
+				__( 'Question requests must come from this site.', 'ai-fun-questions' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		/*
+		 * Charge the site-wide ceiling before anything keyed on the caller.
+		 * Per-IP limits bound one address; only this bounds the total spend
+		 * against the owner's paid AI account.
+		 */
+		if ( ! AI_FQ_Rate_Limiter::allow( 'generate-global', AI_FQ_Rate_Limiter::GLOBAL_LIMIT ) ) {
+			return new WP_Error(
+				'ai_fq_rate_limited',
+				__( 'Please wait before requesting another question.', 'ai-fun-questions' ),
+				array(
+					'status'      => 429,
+					'retry_after' => AI_FQ_Rate_Limiter::WINDOW,
+				)
+			);
+		}
+
+		/*
+		 * Charge the per-IP ceiling next. The bucket above mixes in the
 		 * User-Agent, so a caller rotating that header alone would otherwise
 		 * mint a fresh quota and an unbounded provider bill from one address.
 		 */
@@ -92,7 +122,18 @@ class AI_FQ_REST_API {
 		$question = AI_FQ_Question_Generator::generate();
 
 		if ( is_wp_error( $question ) ) {
-			return $question;
+			/*
+			 * The provider-specific message names which service the site uses
+			 * and that it is currently broken. Keep that for the log and hand
+			 * the visitor something generic.
+			 */
+			self::log_error( $question->get_error_message() );
+
+			return new WP_Error(
+				'ai_fq_unavailable',
+				__( 'The AI service is temporarily unavailable. Please try again.', 'ai-fun-questions' ),
+				array( 'status' => 503 )
+			);
 		}
 
 		$question_token = wp_generate_password( 48, false, false );
@@ -145,6 +186,21 @@ class AI_FQ_REST_API {
 				'ai_fq_answer_too_long',
 				__( 'Your answer is too long.', 'ai-fun-questions' ),
 				array( 'status' => 400 )
+			);
+		}
+
+		/*
+		 * As on generation: the client bucket mixes in the User-Agent, which
+		 * the caller controls, so an IP-only ceiling has to be charged too.
+		 */
+		if ( ! AI_FQ_Rate_Limiter::allow( 'answer-ip|' . self::ip_hash(), AI_FQ_Rate_Limiter::IP_LIMIT ) ) {
+			return new WP_Error(
+				'ai_fq_rate_limited',
+				__( 'Please wait before submitting another answer.', 'ai-fun-questions' ),
+				array(
+					'status'      => 429,
+					'retry_after' => AI_FQ_Rate_Limiter::WINDOW,
+				)
 			);
 		}
 
@@ -251,7 +307,103 @@ class AI_FQ_REST_API {
 	 * @return string
 	 */
 	private static function ip_hash() {
-		return hash_hmac( 'sha256', self::client_ip(), wp_salt( 'auth' ) );
+		return hash_hmac( 'sha256', self::ip_bucket(), wp_salt( 'auth' ) );
+	}
+
+	/**
+	 * The address range a per-IP ceiling should apply to.
+	 *
+	 * A single cheap host is routinely handed a routed IPv6 /64, which is
+	 * 2^64 source addresses and, without this, 2^64 separate allowances.
+	 * Truncating to the /64 makes the whole allocation share one ceiling.
+	 *
+	 * @return string
+	 */
+	private static function ip_bucket() {
+		$ip = self::client_ip();
+
+		if ( ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ) ) {
+			return $ip;
+		}
+
+		$packed = @inet_pton( $ip ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Already validated as IPv6.
+
+		if ( false === $packed || 16 !== strlen( $packed ) ) {
+			return $ip;
+		}
+
+		/*
+		 * An IPv4-mapped address (::ffff:192.0.2.1) has an all-zero first half,
+		 * so truncating to the /64 would put every IPv4 visitor in one bucket —
+		 * which happens routinely when PHP sees REMOTE_ADDR in mapped form.
+		 * Unwrap to the embedded IPv4 and bucket on that instead.
+		 */
+		if ( "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff" === substr( $packed, 0, 12 ) ) {
+			return inet_ntop( substr( $packed, 12, 4 ) );
+		}
+
+		// First 8 bytes = the /64 prefix.
+		return bin2hex( substr( $packed, 0, 8 ) ) . '::/64';
+	}
+
+	/**
+	 * Same-origin check for state-changing public routes.
+	 *
+	 * A missing Origin is allowed: non-browser callers do not send one, and
+	 * the widget's own same-origin request may omit it in older browsers.
+	 *
+	 * Compared on host only. An Origin header is always scheme, host and port
+	 * with no path, so matching it against home_url() in full would never
+	 * succeed on a subdirectory install — and would reject every legitimate
+	 * request on those sites. Both home and site hosts are accepted, which
+	 * covers WordPress living in a different directory from the front end.
+	 *
+	 * @param WP_REST_Request $request Incoming request.
+	 * @return bool
+	 */
+	private static function same_origin( WP_REST_Request $request ) {
+		$origin = $request->get_header( 'Origin' );
+
+		if ( empty( $origin ) ) {
+			return true;
+		}
+
+		$origin_host = wp_parse_url( $origin, PHP_URL_HOST );
+
+		if ( empty( $origin_host ) ) {
+			return false;
+		}
+
+		$allowed = array(
+			wp_parse_url( home_url(), PHP_URL_HOST ),
+			wp_parse_url( site_url(), PHP_URL_HOST ),
+		);
+
+		/**
+		 * Filters the hosts allowed to call the public question endpoint.
+		 *
+		 * Useful where the public host differs from what WordPress knows about,
+		 * such as a reverse proxy or a mapped multisite domain.
+		 *
+		 * @param string[] $allowed Allowed host names.
+		 */
+		$allowed = (array) apply_filters( 'ai_fq_allowed_origin_hosts', array_filter( $allowed ) );
+
+		return in_array( strtolower( $origin_host ), array_map( 'strtolower', $allowed ), true );
+	}
+
+	/**
+	 * Debug-only diagnostics; provider errors are never shown to visitors.
+	 *
+	 * @param string $message Message to record.
+	 */
+	private static function log_error( $message ) {
+		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG || ! defined( 'WP_DEBUG_LOG' ) || ! WP_DEBUG_LOG ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Diagnostics behind WP_DEBUG_LOG.
+		error_log( '[AI Fun Questions] ' . wp_strip_all_tags( $message ) );
 	}
 
 	private static function client_hash() {

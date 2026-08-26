@@ -20,11 +20,17 @@ class AI_FQ_Ollama_Provider implements AI_FQ_Provider_Interface {
 		$body = AI_FQ_Question_Generator::request_body( $model );
 		$body['format'] = 'json';
 
+		/*
+		 * Not wp_safe_remote_post(): Ollama is self-hosted and normally lives on
+		 * loopback, which reject_unsafe_urls would block outright. allowed_url()
+		 * is the gate instead, and a real Ollama endpoint never redirects — so
+		 * refuse to follow one rather than be walked somewhere else.
+		 */
 		$response = wp_remote_post(
 			$url,
 			array(
 				'timeout'     => 30,
-				'redirection' => 2,
+				'redirection' => 0,
 				'headers'     => array(
 					'Content-Type' => 'application/json',
 				),
@@ -95,8 +101,15 @@ class AI_FQ_Ollama_Provider implements AI_FQ_Provider_Interface {
 	}
 
 	private static function log_error( $message ) {
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			error_log( '[AI Fun Questions] ' . wp_strip_all_tags( $message ) );
+		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG || ! defined( 'WP_DEBUG_LOG' ) || ! WP_DEBUG_LOG ) {
+			return;
 		}
+
+		/*
+		 * Provider failures are never shown to visitors, so the reason has to
+		 * go somewhere a site owner can find it. Debug builds only.
+		 */
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Diagnostics behind WP_DEBUG_LOG.
+		error_log( '[AI Fun Questions] ' . wp_strip_all_tags( $message ) );
 	}
 }
