@@ -47,6 +47,26 @@ first `.wp-header-end`; without that marker WordPress drops "Settings saved."
 straight after the `<h1>`. Move or remove the marker and the notice moves with
 it.
 
+### Settings-screen dashboard
+
+`AI_FQ_Dashboard::render()` prints the insight row between the standing note
+and the form. Three things bite here:
+
+- `.ai-fq-button--ghost` must stay *after* `.ai-fq-button` in `admin.css`.
+  Both are single-class selectors, so the later one wins; move it above and
+  the tile's button silently goes back to solid accent blue.
+- Never put an HTML entity inside a string that `esc_html()` will process —
+  `esc_html__( 'a &middot; b' )` escapes the ampersand and renders the entity
+  literally. Use the character.
+- `rtlcss` does not flip the `inset` shorthand. Positioned decoration needs
+  `top`/`bottom`/`left` longhand or it stays on the wrong side in RTL.
+
+Counters are recorded in `AI_FQ_Question_Generator::generate()`, not in the
+REST layer, so every caller is counted and the provider modules stay free of
+anything but their one HTTP call. Providers hand their token counts to
+`normalize_response()`; `generate()` records them and unsets the key, which is
+what keeps the question array — and the transient built from it — unchanged.
+
 ### Frontend
 
 The frontend is vanilla JavaScript. Do not add a framework for this small widget unless there is a demonstrated requirement.

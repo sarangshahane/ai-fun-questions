@@ -50,7 +50,36 @@ class AI_FQ_Question_Generator {
 			);
 		}
 
-		return $provider->generate_question();
+		$question = $provider->generate_question();
+
+		/*
+		 * The dashboard's counters are recorded here rather than in the REST
+		 * layer so that every caller of generate() is counted, and so the
+		 * provider modules stay free of anything but their one HTTP call.
+		 */
+		if ( is_wp_error( $question ) ) {
+			AI_FQ_Stats::record( AI_FQ_Stats::REFUSED_ERROR );
+
+			return $question;
+		}
+
+		$usage = isset( $question['usage'] ) && is_array( $question['usage'] ) ? $question['usage'] : array();
+
+		AI_FQ_Stats::record_many(
+			array(
+				AI_FQ_Stats::GENERATED  => 1,
+				AI_FQ_Stats::TOKENS_IN  => isset( $usage['in'] ) ? (int) $usage['in'] : 0,
+				AI_FQ_Stats::TOKENS_OUT => isset( $usage['out'] ) ? (int) $usage['out'] : 0,
+			)
+		);
+
+		/*
+		 * Usage has done its job. Dropping it keeps the question array — and
+		 * so the transient the REST layer writes — exactly the shape it was.
+		 */
+		unset( $question['usage'] );
+
+		return $question;
 	}
 
 	public static function get_provider( $provider_name ) {
@@ -327,7 +356,12 @@ class AI_FQ_Question_Generator {
 		);
 	}
 
-	public static function normalize_response( $content ) {
+	/**
+	 * @param string $content Raw assistant text from the provider.
+	 * @param array  $usage   Optional token counts: 'in' and 'out'.
+	 * @return array|WP_Error
+	 */
+	public static function normalize_response( $content, $usage = array() ) {
 		$content = trim( (string) $content );
 		$content = preg_replace( '/^```(?:json)?\s*/i', '', $content );
 		$content = preg_replace( '/\s*```$/', '', $content );
@@ -421,11 +455,26 @@ class AI_FQ_Question_Generator {
 			$category = 'general';
 		}
 
-		return array(
+		$normalized = array(
 			'question' => $question,
 			'answer'   => $answer,
 			'category' => $category,
 			'hint'     => $hint,
 		);
+
+		/*
+		 * Envelope shapes differ per provider, so each one reads its own token
+		 * counts and hands them in here. Only added when the provider actually
+		 * reported them: an absent key means "not reported", which the
+		 * dashboard shows differently from a reported zero.
+		 */
+		if ( is_array( $usage ) && ( ! empty( $usage['in'] ) || ! empty( $usage['out'] ) ) ) {
+			$normalized['usage'] = array(
+				'in'  => isset( $usage['in'] ) ? max( 0, (int) $usage['in'] ) : 0,
+				'out' => isset( $usage['out'] ) ? max( 0, (int) $usage['out'] ) : 0,
+			);
+		}
+
+		return $normalized;
 	}
 }

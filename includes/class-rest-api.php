@@ -82,6 +82,14 @@ class AI_FQ_REST_API {
 		 * against the owner's paid AI account.
 		 */
 		if ( ! AI_FQ_Rate_Limiter::allow( 'generate-global', AI_FQ_Rate_Limiter::GLOBAL_LIMIT ) ) {
+			/*
+			 * A refused request must never raise a *limit* counter — that was
+			 * the lockout bug the sliding-window fix closed. This is a metrics
+			 * counter on a table whose row count is bounded by hour and metric,
+			 * so it cannot deny anyone service; it costs one indexed upsert.
+			 */
+			AI_FQ_Stats::record( AI_FQ_Stats::REFUSED_LIMIT );
+
 			return new WP_Error(
 				'ai_fq_rate_limited',
 				__( 'Please wait before requesting another question.', 'ai-fun-questions' ),
@@ -98,6 +106,8 @@ class AI_FQ_REST_API {
 		 * mint a fresh quota and an unbounded provider bill from one address.
 		 */
 		if ( ! AI_FQ_Rate_Limiter::allow( 'generate-ip|' . self::ip_hash(), AI_FQ_Rate_Limiter::IP_LIMIT ) ) {
+			AI_FQ_Stats::record( AI_FQ_Stats::REFUSED_LIMIT );
+
 			return new WP_Error(
 				'ai_fq_rate_limited',
 				__( 'Please wait before requesting another question.', 'ai-fun-questions' ),
@@ -109,6 +119,8 @@ class AI_FQ_REST_API {
 		}
 
 		if ( ! AI_FQ_Rate_Limiter::allow( $bucket ) ) {
+			AI_FQ_Stats::record( AI_FQ_Stats::REFUSED_LIMIT );
+
 			return new WP_Error(
 				'ai_fq_rate_limited',
 				__( 'Please wait before requesting another question.', 'ai-fun-questions' ),
@@ -194,6 +206,8 @@ class AI_FQ_REST_API {
 		 * the caller controls, so an IP-only ceiling has to be charged too.
 		 */
 		if ( ! AI_FQ_Rate_Limiter::allow( 'answer-ip|' . self::ip_hash(), AI_FQ_Rate_Limiter::IP_LIMIT ) ) {
+			AI_FQ_Stats::record( AI_FQ_Stats::REFUSED_LIMIT );
+
 			return new WP_Error(
 				'ai_fq_rate_limited',
 				__( 'Please wait before submitting another answer.', 'ai-fun-questions' ),
@@ -205,6 +219,8 @@ class AI_FQ_REST_API {
 		}
 
 		if ( ! AI_FQ_Rate_Limiter::allow( 'answer|' . self::client_hash() ) ) {
+			AI_FQ_Stats::record( AI_FQ_Stats::REFUSED_LIMIT );
+
 			return new WP_Error(
 				'ai_fq_rate_limited',
 				__( 'Please wait before submitting another answer.', 'ai-fun-questions' ),

@@ -89,9 +89,56 @@ Registers assets and renders the shortcode widget.
 
 Provides provider configuration under WordPress Settings.
 
+### `includes/class-stats.php`
+
+Owns the counter table and every read over it. Counts only — five metrics
+(`generated`, `refused_limit`, `refused_error`, `tokens_in`, `tokens_out`)
+bucketed by the hour.
+
+Hourly buckets rather than daily because the dashboard needs both a rolling
+24-hour figure and a per-day series, and an hour is the coarsest grain that
+still answers the first. Day boundaries are resolved in the site's timezone,
+not UTC: a site at UTC+5:30 would otherwise see last evening's questions
+land on today's column.
+
+Writes are upserts into a table whose row count is bounded by hour and
+metric, so the table does not grow with traffic and a refused request cannot
+inflate anything that governs service. That distinction matters — the
+limiter's own counter deliberately does not move on a refusal, because
+inflating it would deny the feature to everyone.
+
+### `includes/class-dashboard.php`
+
+Owns the insight row above the settings form, and the one admin-only REST
+route behind its connection test.
+
+Everything it shows is derived at render time — counters, live limiter state,
+saved options, one cached query for shortcode placements. It introduces no
+new source of truth, so nothing on the screen can disagree with the rest of
+the plugin.
+
+The connection test runs a real generation rather than a reachability probe,
+because a probe that only checks the host answers reports success on an
+expired API key, which is the failure sites actually have. That is why it
+costs one generation, is never scheduled, and never runs without a click.
+It sits here rather than in `class-rest-api.php`: that module's permission
+model is "anyone, rate-limited" and this route's is the exact opposite.
+
+Token prices are a convenience list, never a price feed. A model with no
+entry is not guessed at — the spend tile shows token counts instead of a
+currency figure the plugin cannot stand behind.
+
 ## State
 
 The plugin does not maintain a permanent question bank.
+
+Two tables exist and both hold nothing but integers:
+
+- `{prefix}ai_fq_rate_limits` — short-lived request counters, pruned after a day.
+- `{prefix}ai_fq_stats` — the dashboard's five counters, pruned after 62 days.
+
+No question text, no answer text and no visitor identifier is written to
+either one.
 
 A generated question is stored in a short-lived transient keyed by a random question token. The stored state includes:
 

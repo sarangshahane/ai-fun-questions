@@ -180,5 +180,39 @@
 		window.addEventListener('scroll', markCurrent, { passive: true });
 	}
 
+	/*
+	 * Connection test. One real generation against the configured provider, so
+	 * the button is disabled while it runs and the result is announced rather
+	 * than only shown — a screen-reader user gets the verdict too.
+	 */
+	const testButton = document.querySelector('[data-ai-fq-test]');
+	const testResult = document.querySelector('[data-ai-fq-test-result]');
+
+	if (testButton && testResult && AI_FQ_ADMIN.testUrl) {
+		testButton.addEventListener('click', () => {
+			testButton.disabled = true;
+			testResult.textContent = AI_FQ_ADMIN.i18n.testing;
+
+			fetch(AI_FQ_ADMIN.testUrl, {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: { 'X-WP-Nonce': AI_FQ_ADMIN.nonce },
+			})
+				.then((response) => response.json())
+				.then((data) => {
+					// A WP_Error body carries `message` but no `ok`.
+					testResult.textContent = data && data.message
+						? data.message
+						: AI_FQ_ADMIN.i18n.testFail;
+				})
+				.catch(() => {
+					testResult.textContent = AI_FQ_ADMIN.i18n.testFail;
+				})
+				.finally(() => {
+					testButton.disabled = false;
+				});
+		});
+	}
+
 	syncPanels();
 })();

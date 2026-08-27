@@ -56,11 +56,15 @@ class AI_FQ_Admin {
 			'ai-fun-questions-admin',
 			'AI_FQ_ADMIN',
 			array(
-				'i18n' => array(
+				'testUrl' => rest_url( 'ai-fun-questions/v1/test-connection' ),
+				'nonce'   => wp_create_nonce( 'wp_rest' ),
+				'i18n'    => array(
 					'saved'    => __( 'All changes saved', 'ai-fun-questions' ),
 					'unsaved'  => __( 'Unsaved changes', 'ai-fun-questions' ),
 					'selected' => __( 'Selected', 'ai-fun-questions' ),
 					'inUse'    => __( 'Saved, not in use', 'ai-fun-questions' ),
+					'testing'  => __( 'Testing…', 'ai-fun-questions' ),
+					'testFail' => __( 'Could not reach the provider.', 'ai-fun-questions' ),
 				),
 			)
 		);
@@ -372,6 +376,8 @@ class AI_FQ_Admin {
 				<?php self::icon( 'info' ); ?>
 				<p><?php esc_html_e( 'No question bank is stored. Each question is generated on demand and only the current question is temporarily cached for the visitor session.', 'ai-fun-questions' ); ?></p>
 			</div>
+
+			<?php AI_FQ_Dashboard::render(); ?>
 
 			<form method="post" action="options.php" class="ai-fq-form" id="ai-fq-form" data-ai-fq-form>
 				<?php settings_fields( 'ai_fq_settings' ); ?>

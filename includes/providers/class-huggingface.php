@@ -51,7 +51,11 @@ class AI_FQ_HuggingFace_Provider implements AI_FQ_Provider_Interface {
 		}
 
 		return AI_FQ_Question_Generator::normalize_response(
-			$data['choices'][0]['message']['content']
+			$data['choices'][0]['message']['content'],
+			array(
+				'in'  => isset( $data['usage']['prompt_tokens'] ) ? (int) $data['usage']['prompt_tokens'] : 0,
+				'out' => isset( $data['usage']['completion_tokens'] ) ? (int) $data['usage']['completion_tokens'] : 0,
+			)
 		);
 	}
 

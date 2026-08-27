@@ -16,6 +16,7 @@
 	--ai-fq-accent-soft: #e8effd;
 	--ai-fq-accent-ink: #1d4fd8;
 	--ai-fq-ok: #1f7a4d;
+	--ai-fq-warn: #8a5a00;
 	--ai-fq-radius: 10px;
 	--ai-fq-radius-sm: 7px;
 
@@ -227,6 +228,178 @@ body.settings_page_ai-fun-questions #wpcontent {
 
 .ai-fq-admin > .notice .notice-dismiss { padding: 8px; }
 .ai-fq-admin .wp-header-end { display: none; }
+
+/* ------------------------------------------------- Insight widget row */
+
+/*
+ * Seven derived tiles above the form. Geometry is the mockup's: a 4-up row
+ * then a 3-up row, 14px gutters, 15px/16px padding, 27px figures. Colour and
+ * radius come from this stylesheet's own tokens rather than the mockup's
+ * literal hexes, so the tiles, the standing note and the settings cards below
+ * are one system instead of three.
+ */
+.ai-fq-widgets {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	padding: 22px 40px 0;
+}
+
+.ai-fq-wgrid {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 14px;
+}
+
+.ai-fq-wgrid--wide {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ai-fq-w {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
+	padding: 15px 16px;
+	border: 1px solid var(--ai-fq-border);
+	border-radius: var(--ai-fq-radius);
+	background: var(--ai-fq-surface);
+}
+
+.ai-fq-w__label {
+	font-size: 11.5px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--ai-fq-text-muted);
+}
+
+.ai-fq-w__value {
+	font-size: 27px;
+	font-weight: 600;
+	line-height: 1.05;
+	letter-spacing: -0.02em;
+	/* Figures in a row of tiles should line up as the numbers change. */
+	font-variant-numeric: tabular-nums;
+}
+
+/* A provider name is not a figure and should not be set at figure size. */
+.ai-fq-w__value--text {
+	font-size: 19px;
+	overflow-wrap: anywhere;
+}
+
+.ai-fq-w__value small {
+	font-size: 13px;
+	font-weight: 500;
+	letter-spacing: 0;
+	color: var(--ai-fq-text-muted);
+}
+
+.ai-fq-w__meta {
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--ai-fq-text-muted);
+}
+
+.ai-fq-w__action {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	margin-top: 2px;
+	flex-wrap: wrap;
+}
+
+.ai-fq-meter {
+	height: 6px;
+	border-radius: 3px;
+	background: var(--ai-fq-border);
+	overflow: hidden;
+}
+
+.ai-fq-meter i {
+	display: block;
+	height: 100%;
+	border-radius: 3px;
+	background: var(--ai-fq-accent);
+}
+
+/*
+ * The polyline is stroked with currentColor so the series takes the accent
+ * from one declaration and follows it if the token ever changes.
+ */
+.ai-fq-spark {
+	display: block;
+	width: 100%;
+	height: 34px;
+	color: var(--ai-fq-accent);
+}
+
+.ai-fq-where {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	font-size: 12.5px;
+}
+
+.ai-fq-where li {
+	display: flex;
+	gap: 8px;
+	margin: 0;
+}
+
+.ai-fq-where a {
+	color: var(--ai-fq-accent);
+	text-decoration: none;
+}
+
+.ai-fq-where a:hover {
+	text-decoration: underline;
+}
+
+/* Post type sits hard right, in the same face the shortcode is set in. */
+.ai-fq-where li > span:last-child {
+	margin-right: auto;
+	flex: none;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 11px;
+	color: var(--ai-fq-text-muted);
+}
+
+.ai-fq-health {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 7px;
+}
+
+.ai-fq-health li {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	margin: 0;
+	font-size: 12.5px;
+	line-height: 1.45;
+}
+
+.ai-fq-health svg {
+	flex: none;
+	/* Optical, not arithmetic: aligns the mark to the x-height, not the line box. */
+	margin-top: 2px;
+}
+
+.ai-fq-health__ok {
+	color: var(--ai-fq-ok);
+}
+
+.ai-fq-health__warn {
+	color: var(--ai-fq-warn);
+}
 
 /* --------------------------------------------------------- Form layout */
 
@@ -923,6 +1096,27 @@ body.settings_page_ai-fun-questions #wpcontent {
 	transition: background-color 0.15s ease;
 }
 
+/* Compact, secondary variant: this button sits inside a tile, not a form. */
+.ai-fq-button--ghost {
+	padding: 0 11px;
+	min-height: 28px;
+	border: 1px solid var(--ai-fq-border-strong);
+	border-radius: var(--ai-fq-radius-sm);
+	background: var(--ai-fq-surface);
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--ai-fq-text);
+}
+
+.ai-fq-button--ghost:hover {
+	background: var(--ai-fq-surface-muted);
+}
+
+.ai-fq-button--ghost[disabled] {
+	opacity: 0.6;
+	cursor: default;
+}
+
 .ai-fq-button:hover,
 .ai-fq-button:focus {
 	background: #1d4fd8;
@@ -964,6 +1158,15 @@ body.settings_page_ai-fun-questions #wpcontent {
 
 	.ai-fq-form {
 		padding: 22px 20px 0;
+	}
+
+	.ai-fq-widgets {
+		padding: 22px 20px 0;
+	}
+
+	.ai-fq-wgrid,
+	.ai-fq-wgrid--wide {
+		grid-template-columns: 1fr;
 	}
 
 	.ai-fq-admin > .notice,
