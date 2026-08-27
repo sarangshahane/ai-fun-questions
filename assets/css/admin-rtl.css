@@ -139,28 +139,55 @@ body.settings_page_ai-fun-questions #wpcontent {
 
 /* -------------------------------------------------------- Info callout */
 
+/*
+ * A standing statement, not an alert: it says the same thing on every visit
+ * and asks nothing of the reader. It still leads the screen, so it is given
+ * card weight and one saturated edge rather than a border loud enough to be
+ * mistaken for something that needs acting on.
+ */
 .ai-fq-note {
+	position: relative;
 	display: flex;
-	align-items: flex-start;
-	gap: 12px;
+	align-items: center;
+	gap: 13px;
 	margin: 22px 40px 0;
-	padding: 18px 22px;
-	border: 1px dashed var(--ai-fq-border-strong);
+	padding: 16px 23px 16px 20px;
+	border: 1px solid var(--ai-fq-border);
 	border-radius: var(--ai-fq-radius);
-	background: transparent;
+	background: var(--ai-fq-surface);
+	box-shadow: 0 1px 2px rgba(28, 30, 33, 0.04);
 	color: var(--ai-fq-text);
+	overflow: hidden;
+}
+
+/*
+ * The edge is painted, not set as a 4px border-left: a thick border bevels
+ * against the 10px radius where it meets the 1px neighbours and renders as
+ * a wedge. Absolutely positioned, or flex would lay it out as an item.
+ */
+.ai-fq-note::before {
+	content: "";
+	position: absolute;
+	/* Longhand, not `inset`: rtlcss does not flip the shorthand, which left
+	   the edge on the wrong side of the card in RTL. `left` it does flip. */
+	top: 0;
+	bottom: 0;
+	right: 0;
+	width: 4px;
+	background: var(--ai-fq-accent);
 }
 
 .ai-fq-note p {
 	margin: 0;
-	max-width: 78ch;
+	max-width: 100%;
 	font-size: 14px;
+	line-height: 1.5;
 }
 
 .ai-fq-note .ai-fq-icon {
 	flex: none;
-	margin-top: 2px;
-	color: var(--ai-fq-text-muted);
+	margin-top: 0;
+	color: var(--ai-fq-accent);
 }
 
 .ai-fq-icon {
