@@ -81,6 +81,10 @@ class AI_FQ_Admin {
 			'ai_fq_openai_endpoint' => array( __CLASS__, 'sanitize_openai_endpoint' ),
 			'ai_fq_openai_key'      => array( __CLASS__, 'sanitize_openai_key' ),
 			'ai_fq_openai_model'    => array( __CLASS__, 'sanitize_openai_model' ),
+			'ai_fq_openai_price_in' => array( __CLASS__, 'sanitize_price' ),
+			'ai_fq_openai_price_out' => array( __CLASS__, 'sanitize_price' ),
+			'ai_fq_hf_price_in'     => array( __CLASS__, 'sanitize_price' ),
+			'ai_fq_hf_price_out'    => array( __CLASS__, 'sanitize_price' ),
 		);
 
 		foreach ( $fields as $field => $callback ) {
@@ -194,6 +198,23 @@ class AI_FQ_Admin {
 		 * @param string $provider Provider key.
 		 */
 		return apply_filters( 'ai_fq_provider_models', $groups, $provider );
+	}
+
+	/**
+	 * A price per million tokens: a non-negative amount, or zero for "unset".
+	 *
+	 * @param mixed $value Submitted value.
+	 * @return float
+	 */
+	public static function sanitize_price( $value ) {
+		$value = (float) str_replace( ',', '.', trim( (string) $value ) );
+
+		if ( $value < 0 || ! is_finite( $value ) ) {
+			return 0.0;
+		}
+
+		// Far above any published rate, and stops an absurd figure being stored.
+		return min( $value, 10000 );
 	}
 
 	public static function sanitize_provider( $value ) {
@@ -528,6 +549,7 @@ class AI_FQ_Admin {
 								'description' => __( 'Use a chat-completion model available through Hugging Face Inference Providers.', 'ai-fun-questions' ),
 							)
 						);
+						self::render_price_fields( 'huggingface' );
 						break;
 
 					case 'openai':
@@ -561,6 +583,7 @@ class AI_FQ_Admin {
 								'description' => __( 'Listed models assume the default OpenAI endpoint.', 'ai-fun-questions' ),
 							)
 						);
+						self::render_price_fields( 'openai' );
 						break;
 				}
 				?>
@@ -649,6 +672,40 @@ class AI_FQ_Admin {
 	 * Secret fields never render their stored value; a placeholder only signals
 	 * that something is saved.
 	 */
+	/**
+	 * The two token prices behind the spend estimate.
+	 *
+	 * Metered providers only — Ollama runs on the site owner's own hardware,
+	 * so there is no per-token price to state. Deliberately settings rather
+	 * than a table shipped in the plugin: there is no pricing API to read, and
+	 * a bundled list is wrong the day the provider changes it.
+	 */
+	private static function render_price_fields( $provider ) {
+		$prefix = 'openai' === $provider ? 'ai_fq_openai_price' : 'ai_fq_hf_price';
+
+		self::render_field(
+			array(
+				'name'        => $prefix . '_in',
+				'label'       => __( 'Input price per 1M tokens', 'ai-fun-questions' ),
+				'type'        => 'number',
+				'step'        => '0.01',
+				'min'         => '0',
+				'value'       => (string) get_option( $prefix . '_in', 0 ),
+				'description' => __( 'From your provider\'s pricing page, in your billing currency. Used only for the estimate on this screen. Leave both at 0 to show token counts instead.', 'ai-fun-questions' ),
+			)
+		);
+		self::render_field(
+			array(
+				'name'  => $prefix . '_out',
+				'label' => __( 'Output price per 1M tokens', 'ai-fun-questions' ),
+				'type'  => 'number',
+				'step'  => '0.01',
+				'min'   => '0',
+				'value' => (string) get_option( $prefix . '_out', 0 ),
+			)
+		);
+	}
+
 	private static function render_field( $args ) {
 		$args = wp_parse_args(
 			$args,
@@ -663,6 +720,8 @@ class AI_FQ_Admin {
 				'stored'      => false,
 				'full'        => false,
 				'choices'     => array(),
+				'step'        => '',
+				'min'         => '',
 			)
 		);
 
@@ -697,6 +756,12 @@ class AI_FQ_Admin {
 					id="<?php echo esc_attr( $id ); ?>"
 					name="<?php echo esc_attr( $args['name'] ); ?>"
 					value="<?php echo $args['secret'] ? '' : esc_attr( $args['value'] ); ?>"
+					<?php if ( '' !== $args['step'] ) : ?>
+						step="<?php echo esc_attr( $args['step'] ); ?>"
+					<?php endif; ?>
+					<?php if ( '' !== $args['min'] ) : ?>
+						min="<?php echo esc_attr( $args['min'] ); ?>"
+					<?php endif; ?>
 					<?php if ( $args['secret'] ) : ?>
 						autocomplete="new-password"
 						placeholder="<?php echo esc_attr( $args['stored'] ? str_repeat( "\xe2\x80\xa2", 12 ) : '' ); ?>"

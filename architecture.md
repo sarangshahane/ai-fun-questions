@@ -124,9 +124,15 @@ costs one generation, is never scheduled, and never runs without a click.
 It sits here rather than in `class-rest-api.php`: that module's permission
 model is "anyone, rate-limited" and this route's is the exact opposite.
 
-Token prices are a convenience list, never a price feed. A model with no
-entry is not guessed at — the spend tile shows token counts instead of a
-currency figure the plugin cannot stand behind.
+Token prices come from the settings, not from a table shipped in the code.
+There is no pricing API to call and a bundled list is stale the day a
+provider changes it, so the only honest number is the one the site owner
+entered. Until they do, the spend tile reports token counts.
+
+The transport check reads each provider's real endpoint through
+`AI_FQ_Dashboard::endpoint()`, including the wp-config pairing rule, rather
+than keeping its own copy of the URL — a second copy can drift, and a check
+that cannot fail reports nothing.
 
 ## State
 

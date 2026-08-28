@@ -109,32 +109,48 @@ class AI_FQ_Dashboard {
 	}
 
 	/**
-	 * Published list prices per million tokens, as input/output pairs.
+	 * What this site pays per million tokens, as an input/output pair.
 	 *
-	 * A convenience list, exactly like the model catalogue, and never a price
-	 * feed: published prices move and this file does not. Models absent from
-	 * the map are not guessed at — the spend widget shows token counts for
-	 * them instead of a currency figure it cannot stand behind.
+	 * Read from the settings, not from a table shipped in this file. There is
+	 * no pricing API to call, and a hardcoded list is stale the day a provider
+	 * changes it — so the only number the plugin can honestly show is the one
+	 * the site owner entered. Zero means "not told", and the spend tile then
+	 * reports token counts rather than a currency figure.
 	 *
-	 * @return array Model identifier => array( input, output ).
+	 * @return float[] array( input, output )
 	 */
 	public static function prices() {
+		$provider = self::provider_summary();
+
+		/*
+		 * Keyed per provider, like the credentials: every provider panel stays
+		 * in the DOM so switching does not drop saved values, which means one
+		 * shared option name would be submitted twice and the hidden panel's
+		 * empty box would win. Ollama runs on the owner's own hardware and has
+		 * no per-token price to state.
+		 */
+		switch ( $provider['key'] ) {
+			case 'openai':
+				$prefix = 'ai_fq_openai_price';
+				break;
+			case 'huggingface':
+				$prefix = 'ai_fq_hf_price';
+				break;
+			default:
+				return apply_filters( 'ai_fq_token_prices', array( 0.0, 0.0 ) );
+		}
+
 		$prices = array(
-			'gpt-4o-mini'  => array( 0.15, 0.60 ),
-			'gpt-4o'       => array( 2.50, 10.00 ),
-			'gpt-4.1'      => array( 2.00, 8.00 ),
-			'gpt-4.1-mini' => array( 0.40, 1.60 ),
-			'gpt-4.1-nano' => array( 0.10, 0.40 ),
-			'gpt-5-mini'   => array( 0.25, 2.00 ),
-			'gpt-5-nano'   => array( 0.05, 0.40 ),
+			(float) get_option( $prefix . '_in', 0 ),
+			(float) get_option( $prefix . '_out', 0 ),
 		);
 
 		/**
 		 * Filters the per-million-token prices used for the spend estimate.
 		 *
-		 * @param array $prices Model identifier => array( input, output ).
+		 * @param float[] $prices array( input, output ).
 		 */
-		return apply_filters( 'ai_fq_model_prices', $prices );
+		return apply_filters( 'ai_fq_token_prices', $prices );
 	}
 
 	/**
@@ -229,9 +245,22 @@ class AI_FQ_Dashboard {
 			);
 		}
 
+		/*
+		 * Counted, not inferred from the capped list. Listing five and saying
+		 * "the five most recent" told the reader nothing about how many there
+		 * actually are, which is the one number this tile exists to give.
+		 */
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Counts the same LIKE as above; cached in the transient below.
+		$total = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_content LIKE %s",
+				$like
+			)
+		);
+
 		$result = array(
 			'items' => array_slice( $items, 0, self::PLACEMENT_LIMIT ),
-			'more'  => count( $items ) > self::PLACEMENT_LIMIT,
+			'total' => $total,
 		);
 
 		set_transient( 'ai_fq_shortcode_locations', $result, self::PLACEMENT_TTL );
@@ -259,9 +288,7 @@ class AI_FQ_Dashboard {
 				: __( 'Credential stored in the <b>database</b>', 'ai-fun-questions' ),
 		);
 
-		$endpoint = 'openai' === $provider['key']
-			? ( defined( 'AI_FQ_OPENAI_ENDPOINT' ) ? AI_FQ_OPENAI_ENDPOINT : get_option( 'ai_fq_openai_endpoint', '' ) )
-			: ( 'ollama' === $provider['key'] ? get_option( 'ai_fq_ollama_url', '' ) : 'https://router.huggingface.co' );
+		$endpoint = self::endpoint( $provider['key'] );
 
 		$https = 0 === stripos( trim( (string) $endpoint ), 'https://' );
 
@@ -296,25 +323,58 @@ class AI_FQ_Dashboard {
 	}
 
 	/**
+	 * The URL the active provider will actually post to.
+	 *
+	 * Read from the same places the provider reads, including the wp-config
+	 * pairing rule, so the transport check reports on the real request rather
+	 * than on a second copy of the string that could drift away from it.
+	 *
+	 * @param string $key Provider key.
+	 * @return string
+	 */
+	public static function endpoint( $key ) {
+		switch ( $key ) {
+			case 'openai':
+				/*
+				 * A key from wp-config.php forces the endpoint to come from
+				 * wp-config.php too; the provider ignores the stored option in
+				 * that case, so reading it here would report the wrong host.
+				 */
+				if ( defined( 'AI_FQ_OPENAI_KEY' ) ) {
+					return defined( 'AI_FQ_OPENAI_ENDPOINT' )
+						? (string) AI_FQ_OPENAI_ENDPOINT
+						: 'https://api.openai.com/v1/chat/completions';
+				}
+
+				return (string) get_option( 'ai_fq_openai_endpoint', 'https://api.openai.com/v1/chat/completions' );
+
+			case 'huggingface':
+				return AI_FQ_HuggingFace_Provider::ENDPOINT;
+
+			default:
+				return (string) get_option( 'ai_fq_ollama_url', 'http://localhost:11434/api/chat' );
+		}
+	}
+
+	/**
 	 * Spend for the current month, or token counts when no price is known.
 	 *
 	 * @return array
 	 */
 	public static function spend() {
 		$provider = self::provider_summary();
-		$prices   = self::prices();
 		$in       = AI_FQ_Stats::this_month( AI_FQ_Stats::TOKENS_IN );
 		$out      = AI_FQ_Stats::this_month( AI_FQ_Stats::TOKENS_OUT );
 
-		if ( ! isset( $prices[ $provider['model'] ] ) ) {
+		list( $price_in, $price_out ) = self::prices();
+
+		if ( $price_in <= 0 && $price_out <= 0 ) {
 			return array(
 				'priced' => false,
 				'tokens' => $in + $out,
 				'model'  => $provider['model'],
 			);
 		}
-
-		list( $price_in, $price_out ) = $prices[ $provider['model'] ];
 
 		return array(
 			'priced'    => true,
@@ -434,12 +494,13 @@ class AI_FQ_Dashboard {
 				<div class="ai-fq-w">
 					<span class="ai-fq-w__label"><?php esc_html_e( 'Estimated spend', 'ai-fun-questions' ); ?></span>
 					<?php if ( $spend['priced'] ) : ?>
-						<span class="ai-fq-w__value">$<?php echo esc_html( number_format_i18n( $spend['amount'], 2 ) ); ?></span>
+						<?php /* No currency symbol: the rate came from a settings field, and the plugin is not told which currency it is in. */ ?>
+						<span class="ai-fq-w__value"><?php echo esc_html( number_format_i18n( $spend['amount'], 2 ) ); ?></span>
 						<span class="ai-fq-w__meta">
 							<?php
 							printf(
 								/* translators: 1: model name, 2: input price, 3: output price. */
-								esc_html__( 'This month · %1$s at $%2$s / $%3$s per 1M', 'ai-fun-questions' ),
+								esc_html__( 'This month · %1$s at %2$s / %3$s per 1M', 'ai-fun-questions' ),
 								esc_html( $spend['model'] ),
 								esc_html( number_format_i18n( $spend['price_in'], 2 ) ),
 								esc_html( number_format_i18n( $spend['price_out'], 2 ) )
@@ -450,11 +511,7 @@ class AI_FQ_Dashboard {
 						<span class="ai-fq-w__value"><?php echo esc_html( number_format_i18n( $spend['tokens'] ) ); ?> <small><?php esc_html_e( 'tokens', 'ai-fun-questions' ); ?></small></span>
 						<span class="ai-fq-w__meta">
 							<?php
-							printf(
-								/* translators: %s: model name. */
-								esc_html__( 'This month · no published price on file for %s', 'ai-fun-questions' ),
-								esc_html( '' !== $spend['model'] ? $spend['model'] : __( 'this model', 'ai-fun-questions' ) )
-							);
+							esc_html_e( 'This month · set a token price below to see an estimate', 'ai-fun-questions' );
 							?>
 						</span>
 					<?php endif; ?>
@@ -517,24 +574,31 @@ class AI_FQ_Dashboard {
 						</ul>
 						<span class="ai-fq-w__meta">
 							<?php
-							echo esc_html(
-								$placements['more']
-									? sprintf(
-										/* translators: %s: number of listed placements. */
-										__( 'The %s most recently edited posts and pages', 'ai-fun-questions' ),
-										number_format_i18n( count( $placements['items'] ) )
-									)
-									: sprintf(
-										/* translators: %s: number of posts and pages. */
-										_n(
-											'%s post or page contains the shortcode',
-											'%s posts and pages contain the shortcode',
-											count( $placements['items'] ),
-											'ai-fun-questions'
-										),
-										number_format_i18n( count( $placements['items'] ) )
-									)
+							$total = (int) $placements['total'];
+
+							/* translators: %s: number of posts and pages. */
+							$label = _n(
+								'%s post or page contains the shortcode',
+								'%s posts and pages contain the shortcode',
+								$total,
+								'ai-fun-questions'
 							);
+
+							printf(
+								esc_html( $label ),
+								esc_html( number_format_i18n( $total ) )
+							);
+
+							$hidden = $total - count( $placements['items'] );
+
+							if ( $hidden > 0 ) {
+								echo ' ';
+								printf(
+									/* translators: %s: number of placements not listed. */
+									esc_html__( '(%s not listed)', 'ai-fun-questions' ),
+									esc_html( number_format_i18n( $hidden ) )
+								);
+							}
 							?>
 						</span>
 					<?php endif; ?>

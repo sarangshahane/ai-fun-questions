@@ -29,6 +29,10 @@ function ai_fq_uninstall_site() {
 		'ai_fq_openai_endpoint',
 		'ai_fq_openai_key',
 		'ai_fq_openai_model',
+		'ai_fq_openai_price_in',
+		'ai_fq_openai_price_out',
+		'ai_fq_hf_price_in',
+		'ai_fq_hf_price_out',
 		'ai_fq_stats_db_version',
 	);
 

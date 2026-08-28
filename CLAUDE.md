@@ -61,6 +61,16 @@ and the form. Three things bite here:
 - `rtlcss` does not flip the `inset` shorthand. Positioned decoration needs
   `top`/`bottom`/`left` longhand or it stays on the wrong side in RTL.
 
+Every provider panel stays in the DOM so switching providers does not drop
+saved credentials. Any field added to a panel therefore needs a per-provider
+option name — a shared one is submitted twice and the hidden panel's empty box
+wins.
+
+Token prices are settings, not a bundled table. There is no pricing API to
+call and a shipped list is wrong the day a provider changes it, so the tile
+shows a currency figure only when the site owner has entered a rate, and no
+currency symbol, because the plugin is not told which currency it is.
+
 Counters are recorded in `AI_FQ_Question_Generator::generate()`, not in the
 REST layer, so every caller is counted and the provider modules stay free of
 anything but their one HTTP call. Providers hand their token counts to
