@@ -149,5 +149,36 @@
 		}
 	}
 
+	/*
+	 * Mark the section the reader is in. Purely presentational: the links are
+	 * ordinary anchors and still work with this disabled.
+	 */
+	const jumpLinks = form.parentElement.querySelectorAll('.ai-fq-jump a');
+
+	if (jumpLinks.length) {
+		const sections = [...jumpLinks]
+			.map((link) => ({ link, target: document.querySelector(link.getAttribute('href')) }))
+			.filter((pair) => pair.target);
+
+		const markCurrent = () => {
+			// Anything above this line has been scrolled past the sticky header.
+			const line = 140;
+			let current = sections[0];
+
+			sections.forEach((pair) => {
+				if (pair.target.getBoundingClientRect().top <= line) {
+					current = pair;
+				}
+			});
+
+			sections.forEach((pair) => {
+				pair.link.classList.toggle('is-current', pair === current);
+			});
+		};
+
+		markCurrent();
+		window.addEventListener('scroll', markCurrent, { passive: true });
+	}
+
 	syncPanels();
 })();

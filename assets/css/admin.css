@@ -5,17 +5,19 @@
  */
 
 .ai-fq-admin {
-	--ai-fq-bg: #faf9f7;
+	--ai-fq-bg: #f6f5f3;
 	--ai-fq-surface: #ffffff;
 	--ai-fq-surface-muted: #f5f4f1;
-	--ai-fq-border: #e3e2dd;
-	--ai-fq-border-strong: #d6d5cf;
-	--ai-fq-text: #1f2124;
-	--ai-fq-text-muted: #6b7280;
+	--ai-fq-border: #e6e3dd;
+	--ai-fq-border-strong: #d8d4cc;
+	--ai-fq-text: #1c1e21;
+	--ai-fq-text-muted: #63666b;
 	--ai-fq-accent: #2563eb;
-	--ai-fq-accent-soft: #dbe6fd;
-	--ai-fq-radius: 12px;
-	--ai-fq-radius-sm: 9px;
+	--ai-fq-accent-soft: #e8effd;
+	--ai-fq-accent-ink: #1d4fd8;
+	--ai-fq-ok: #1f7a4d;
+	--ai-fq-radius: 10px;
+	--ai-fq-radius-sm: 7px;
 
 	/*
 	 * Local handwriting faces only. A webfont would mean an external request
@@ -24,7 +26,7 @@
 	--ai-fq-font-hand: "Bradley Hand", "Segoe Print", "Chalkboard SE", "Comic Sans MS", "Comic Neue", cursive;
 
 	margin: 0;
-	padding: 20px 40px;
+	padding: 0 0 40px;
 	color: var(--ai-fq-text);
 	font-size: 14px;
 	line-height: 1.55;
@@ -53,32 +55,76 @@ body.settings_page_ai-fun-questions #wpcontent {
 
 /* ---------------------------------------------------------------- Header */
 
-.ai-fq-admin__title {
+/*
+ * One row, 56px. Sticky so Save stays reachable now that the bottom bar is
+ * gone; it clears the fixed admin bar the same way the rail does.
+ */
+.ai-fq-admin__header {
+	position: sticky;
+	top: var(--wp-admin--admin-bar--height, 32px);
+	z-index: 20;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24px;
+	height: 56px;
+	padding: 0 40px;
+	border-bottom: 1px solid var(--ai-fq-border);
+	background: var(--ai-fq-surface);
+}
+
+.ai-fq-admin__identity {
+	display: flex;
+	align-items: baseline;
+	gap: 12px;
+	min-width: 0;
+}
+
+/* Doubled selector so this beats core's `.wrap h1`, which used to win. */
+.ai-fq-admin .ai-fq-admin__title {
+	margin: 0;
+	padding: 0;
+	font-family: var(--ai-fq-font-hand);
+	font-size: 25px;
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: 0.2px;
+	color: var(--ai-fq-text);
+}
+
+
+.ai-fq-admin__version {
+	flex: none;
+	padding: 2px 8px;
+	border: 1px solid var(--ai-fq-border);
+	border-radius: 999px;
+	background: var(--ai-fq-surface);
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1.5;
+	color: var(--ai-fq-text-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+.ai-fq-admin__actions {
 	display: flex;
 	align-items: center;
 	gap: 14px;
-	margin: 18px 0 22px;
-	padding: 0;
-	font-family: var(--ai-fq-font-hand);
-	font-size: 42px;
-	font-weight: 700;
-	line-height: 1.15;
-	letter-spacing: 0.4px;
-	color: var(--ai-fq-text);
+	flex: none;
 }
 
 .ai-fq-pill {
 	display: inline-flex;
 	align-items: center;
-	padding: 4px 12px;
+	padding: 3px 9px;
 	border: 1px solid var(--ai-fq-border-strong);
 	border-radius: 999px;
 	background: var(--ai-fq-surface);
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-	font-size: 11px;
+	font-size: 10px;
 	font-weight: 600;
 	line-height: 1.6;
-	letter-spacing: 0.09em;
+	letter-spacing: 0.08em;
 	text-transform: uppercase;
 	color: var(--ai-fq-text-muted);
 	white-space: nowrap;
@@ -96,7 +142,7 @@ body.settings_page_ai-fun-questions #wpcontent {
 	display: flex;
 	align-items: flex-start;
 	gap: 12px;
-	margin: 0 0 30px;
+	margin: 22px 40px 0;
 	padding: 18px 22px;
 	border: 1px dashed var(--ai-fq-border-strong);
 	border-radius: var(--ai-fq-radius);
@@ -122,17 +168,65 @@ body.settings_page_ai-fun-questions #wpcontent {
 	height: 20px;
 }
 
-/* Core notices, restyled to sit inside the design. */
+/*
+ * Notices land between the header and the content because .wp-header-end
+ * marks that slot. Slim, inside the gutter, styled like the page rather than
+ * like a core admin box.
+ */
+/*
+ * Core prints notices at the top of .wrap and common.js then relocates them
+ * below .wp-header-end, which reads as the notice jumping. Hide them until
+ * they have landed: only a notice that follows the marker is shown.
+ */
 .ai-fq-admin > .notice,
 .ai-fq-admin > .updated,
 .ai-fq-admin > .error {
-	margin: 0 0 22px;
+	display: none;
+}
+
+.ai-fq-admin > .wp-header-end ~ .notice,
+.ai-fq-admin > .wp-header-end ~ .updated,
+.ai-fq-admin > .wp-header-end ~ .error {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 22px 40px 0;
+	padding: 10px 14px;
 	border: 1px solid var(--ai-fq-border);
-	border-left-width: 4px;
-	border-radius: var(--ai-fq-radius-sm);
+	border-left: 3px solid var(--ai-fq-text-muted);
+	border-radius: 8px;
 	background: var(--ai-fq-surface);
 	box-shadow: none;
+	font-size: 13px;
 }
+
+.ai-fq-admin > .notice p,
+.ai-fq-admin > .updated p,
+.ai-fq-admin > .error p {
+	margin: 0;
+	padding: 0;
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.ai-fq-admin > .notice-success,
+.ai-fq-admin > .updated {
+	border-color: #bfe3cd;
+	border-left-color: var(--ai-fq-ok);
+	background: #f1f9f4;
+	color: #16603c;
+}
+
+.ai-fq-admin > .notice-error,
+.ai-fq-admin > .error {
+	border-color: #efc9c2;
+	border-left-color: #a33c2c;
+	background: #fdf3f1;
+	color: #8c3325;
+}
+
+.ai-fq-admin > .notice .notice-dismiss { padding: 8px; }
+.ai-fq-admin .wp-header-end { display: none; }
 
 /* --------------------------------------------------------- Form layout */
 
@@ -146,6 +240,7 @@ body.settings_page_ai-fun-questions #wpcontent {
 	grid-template-columns: minmax(0, 1fr) 340px;
 	gap: 26px;
 	align-items: start;
+	padding: 22px 40px 0;
 }
 
 .ai-fq-form__main {
@@ -155,42 +250,95 @@ body.settings_page_ai-fun-questions #wpcontent {
 .ai-fq-form__aside {
 	min-width: 0;
 	position: sticky;
-	/* Clear the fixed admin bar; the fallback covers pre-5.9 admin screens. */
-	top: calc(var(--wp-admin--admin-bar--height, 32px) + 14px);
+	/* Clear the fixed admin bar plus the sticky header sitting above it. */
+	top: calc(var(--wp-admin--admin-bar--height, 32px) + 70px);
 }
 
-.ai-fq-form__aside .ai-fq-card {
-	margin-top: 0;
+.ai-fq-form__aside .ai-fq-card:last-child {
+	margin-bottom: 0;
 }
 
-.ai-fq-form__aside .ai-fq-card + .ai-fq-card {
-	margin-top: 18px;
+/* Usage sits above the notes and carries only the shortcode. */
+.ai-fq-card--usage .ai-fq-card__text {
+	margin-bottom: 10px;
 }
 
-.ai-fq-savebar {
-	grid-column: 1 / -1;
+/* Rail jump links. */
+.ai-fq-jump {
+	margin: 0 0 22px;
+	padding: 20px 22px;
+	border: 1px solid var(--ai-fq-border);
+	border-radius: var(--ai-fq-radius);
+	background: var(--ai-fq-surface);
+}
+
+.ai-fq-jump__title {
+	margin: 0 0 9px;
+	padding: 0;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.09em;
+	text-transform: uppercase;
+	color: var(--ai-fq-text-muted);
+}
+
+.ai-fq-jump ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+/* wp-admin puts a 6px bottom margin on list items, which pushed these
+   38px apart instead of the 30px the gap alone gives. */
+.ai-fq-jump li {
+	margin: 0;
+}
+
+.ai-fq-jump a {
+	display: block;
+	margin-left: -9px;
+	padding: 5px 9px;
+	border-radius: 6px;
+	font-size: 13px;
+	color: var(--ai-fq-text);
+	text-decoration: none;
+}
+
+.ai-fq-jump a:hover { background: var(--ai-fq-surface-muted); }
+
+.ai-fq-jump a.is-current {
+	background: var(--ai-fq-accent-soft);
+	color: var(--ai-fq-accent-ink);
+	font-weight: 600;
+}
+
+.ai-fq-jump a:focus-visible {
+	outline: 2px solid var(--ai-fq-accent);
+	outline-offset: 1px;
 }
 
 /* ------------------------------------------------------ Provider picker */
 
+/* The visible container is .ai-fq-card--providers; the fieldset only groups
+   the radios for assistive tech, so it carries no box of its own. */
 .ai-fq-providers {
-	margin: 0 0 26px;
+	margin: 0;
 	padding: 0;
 	border: 0;
-}
-
-.ai-fq-providers__legend {
-	margin: 0 0 10px;
-	padding: 0;
-	font-size: 13px;
-	font-weight: 600;
-	color: var(--ai-fq-text);
+	min-width: 0;
 }
 
 .ai-fq-providers__grid {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: 18px;
+	gap: 14px;
+}
+
+.ai-fq-card--providers .ai-fq-card__text {
+	margin-bottom: 14px;
 }
 
 .ai-fq-provider {
@@ -214,8 +362,8 @@ body.settings_page_ai-fun-questions #wpcontent {
 .ai-fq-provider__card {
 	display: block;
 	height: 100%;
-	padding: 20px 22px 22px;
-	border: 1.5px solid var(--ai-fq-border);
+	padding: 14px 16px;
+	border: 1px solid var(--ai-fq-border);
 	border-radius: var(--ai-fq-radius);
 	background: var(--ai-fq-surface);
 	transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -239,7 +387,7 @@ body.settings_page_ai-fun-questions #wpcontent {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin-bottom: 18px;
+	margin-bottom: 12px;
 }
 
 .ai-fq-provider__icon {
@@ -255,8 +403,8 @@ body.settings_page_ai-fun-questions #wpcontent {
 .ai-fq-provider__mark {
 	position: relative;
 	flex: none;
-	width: 20px;
-	height: 20px;
+	width: 18px;
+	height: 18px;
 	border: 1.5px solid var(--ai-fq-border-strong);
 	border-radius: 50%;
 	background: var(--ai-fq-surface);
@@ -268,11 +416,16 @@ body.settings_page_ai-fun-questions #wpcontent {
 	background: var(--ai-fq-accent);
 }
 
+/*
+ * Centred on an 18px mark: the padding box is 15px across, so the glyph's
+ * own centre (left + 2.5, top + 4.5) has to land on 7.5, 7.5. Change the
+ * mark size and these two numbers have to move with it.
+ */
 .ai-fq-provider__mark::after {
 	content: "";
 	position: absolute;
-	top: 4px;
-	left: 6px;
+	top: 3px;
+	left: 5px;
 	width: 5px;
 	height: 9px;
 	border: solid #fff;
@@ -289,15 +442,15 @@ body.settings_page_ai-fun-questions #wpcontent {
 
 .ai-fq-provider__name {
 	display: block;
-	font-size: 15px;
-	font-weight: 700;
+	font-size: 14px;
+	font-weight: 600;
 	color: var(--ai-fq-text);
 }
 
 .ai-fq-provider__subtitle {
 	display: block;
-	margin-top: 3px;
-	font-size: 13px;
+	margin-top: 2px;
+	font-size: 12.5px;
 	color: var(--ai-fq-text-muted);
 }
 
@@ -310,8 +463,8 @@ body.settings_page_ai-fun-questions #wpcontent {
  */
 .ai-fq-panel {
 	display: none;
-	margin: 0 0 18px;
-	padding: 22px 26px 26px;
+	margin: 0 0 22px;
+	padding: 20px 22px;
 	border: 1px solid var(--ai-fq-border);
 	border-radius: var(--ai-fq-radius);
 	background: var(--ai-fq-surface);
@@ -324,17 +477,18 @@ body.settings_page_ai-fun-questions #wpcontent {
 .ai-fq-panel__header {
 	display: flex;
 	align-items: center;
-	gap: 12px;
-	margin-bottom: 18px;
+	gap: 10px;
+	margin-bottom: 14px;
 }
 
+/* Same treatment as every other section heading — no second display face. */
 .ai-fq-panel__title {
 	margin: 0;
 	padding: 0;
-	font-family: var(--ai-fq-font-hand);
-	font-size: 21px;
-	font-weight: 700;
-	line-height: 1.2;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.3;
+	letter-spacing: -0.005em;
 	color: var(--ai-fq-text);
 }
 
@@ -353,7 +507,7 @@ body.settings_page_ai-fun-questions #wpcontent {
 .ai-fq-panel__grid {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 18px 24px;
+	gap: 16px 20px;
 	align-items: start;
 }
 
@@ -364,52 +518,57 @@ body.settings_page_ai-fun-questions #wpcontent {
 .ai-fq-field__label {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	margin-bottom: 7px;
-	font-size: 13px;
-	font-weight: 700;
-	color: var(--ai-fq-text);
+	gap: 7px;
+	margin-bottom: 6px;
+	font-size: 12.5px;
+	font-weight: 500;
+	color: var(--ai-fq-text-muted);
 }
 
-.ai-fq-field__input {
+/*
+ * Scoped to .ai-fq-admin on purpose: core's forms.css styles these by element
+ * and attribute, which outranks a lone class and was quietly restoring its own
+ * radius, padding and height.
+ */
+.ai-fq-admin .ai-fq-field__input {
 	display: block;
 	width: 100%;
-	min-height: 46px;
+	min-height: 38px;
 	margin: 0;
-	padding: 11px 15px;
+	padding: 8px 12px;
 	border: 1px solid var(--ai-fq-border-strong);
 	border-radius: var(--ai-fq-radius-sm);
 	background: var(--ai-fq-surface);
 	box-shadow: none;
-	font-size: 14px;
+	font-size: 13px;
 	line-height: 1.5;
 	color: var(--ai-fq-text);
 }
 
-.ai-fq-field__input::-moz-placeholder {
+.ai-fq-admin .ai-fq-field__input::-moz-placeholder {
 	color: #b8b7b1;
 	letter-spacing: 0.12em;
 }
 
-.ai-fq-field__input::placeholder {
+.ai-fq-admin .ai-fq-field__input::placeholder {
 	color: #b8b7b1;
 	letter-spacing: 0.12em;
 }
 
-.ai-fq-field__input:focus {
+.ai-fq-admin .ai-fq-field__input:focus {
 	border-color: var(--ai-fq-accent);
 	box-shadow: 0 0 0 3px var(--ai-fq-accent-soft);
 	outline: 0;
 }
 
 /* Model picker: same shell as a text input, with a chevron of our own. */
-.ai-fq-field__select {
+.ai-fq-admin .ai-fq-field__select {
 	display: block;
 	width: 100%;
-	min-height: 46px;
+	min-height: 38px;
 	max-width: none;
 	margin: 0;
-	padding: 11px 40px 11px 15px;
+	padding: 8px 40px 8px 12px;
 	border: 1px solid var(--ai-fq-border-strong);
 	border-radius: var(--ai-fq-radius-sm);
 	background-color: var(--ai-fq-surface);
@@ -418,7 +577,7 @@ body.settings_page_ai-fun-questions #wpcontent {
 	background-repeat: no-repeat;
 	background-position: right 14px center;
 	box-shadow: none;
-	font-size: 14px;
+	font-size: 13px;
 	line-height: 1.5;
 	color: var(--ai-fq-text);
 	-webkit-appearance: none;
@@ -426,7 +585,7 @@ body.settings_page_ai-fun-questions #wpcontent {
 	appearance: none;
 }
 
-.ai-fq-field__select:focus {
+.ai-fq-admin .ai-fq-field__select:focus {
 	border-color: var(--ai-fq-accent);
 	box-shadow: 0 0 0 3px var(--ai-fq-accent-soft);
 	outline: 0;
@@ -455,16 +614,16 @@ body.settings_page_ai-fun-questions #wpcontent {
 /* Random reads as a row above the chips, not as another chip. */
 .ai-fq-topic-random {
 	display: block;
-	margin-bottom: 16px;
+	margin-bottom: 14px;
 	cursor: pointer;
 }
 
 .ai-fq-topic-random__row {
 	display: flex;
 	align-items: center;
-	gap: 12px;
-	padding: 13px 16px;
-	border: 1.5px solid var(--ai-fq-border);
+	gap: 11px;
+	padding: 11px 14px;
+	border: 1px solid var(--ai-fq-border);
 	border-radius: var(--ai-fq-radius);
 	background: var(--ai-fq-surface);
 	transition: border-color 0.15s ease, background-color 0.15s ease;
@@ -489,8 +648,8 @@ body.settings_page_ai-fun-questions #wpcontent {
 .ai-fq-topic-random__mark {
 	position: relative;
 	flex: none;
-	width: 20px;
-	height: 20px;
+	width: 18px;
+	height: 18px;
 	border: 1.5px solid var(--ai-fq-border-strong);
 	border-radius: 50%;
 	background: var(--ai-fq-surface);
@@ -505,8 +664,8 @@ body.settings_page_ai-fun-questions #wpcontent {
 .ai-fq-topic-random__mark::after {
 	content: "";
 	position: absolute;
-	top: 4px;
-	left: 6px;
+	top: 3px;
+	left: 5px;
 	width: 5px;
 	height: 9px;
 	border: solid #fff;
@@ -542,25 +701,36 @@ body.settings_page_ai-fun-questions #wpcontent {
 .ai-fq-topics__groups {
 	display: flex;
 	flex-direction: column;
-	gap: 18px;
+	gap: 16px;
 	transition: opacity 0.15s ease;
 }
 
+/* A heading, not a badge: sentence case with a rule, so it cannot be
+   confused with .ai-fq-pill, which shares nothing with it now. */
 .ai-fq-topics__group-label {
-	display: block;
+	display: flex;
+	align-items: center;
+	gap: 10px;
 	margin-bottom: 9px;
-	font-size: 11px;
+	font-size: 12.5px;
 	font-weight: 600;
-	letter-spacing: 0.09em;
-	text-transform: uppercase;
-	color: var(--ai-fq-text-muted);
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--ai-fq-text);
+}
+
+.ai-fq-topics__group-label::after {
+	content: "";
+	flex: 1;
+	height: 1px;
+	background: var(--ai-fq-border);
 }
 
 /* The chips themselves. */
 .ai-fq-topics__grid {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 9px;
+	gap: 7px;
 }
 
 .ai-fq-topic {
@@ -572,13 +742,13 @@ body.settings_page_ai-fun-questions #wpcontent {
 .ai-fq-topic__chip {
 	display: inline-flex;
 	align-items: center;
-	gap: 7px;
-	padding: 8px 14px;
-	border: 1.5px solid var(--ai-fq-border);
+	gap: 6px;
+	padding: 6px 11px;
+	border: 1px solid var(--ai-fq-border);
 	border-radius: 999px;
 	background: var(--ai-fq-surface);
-	font-size: 13px;
-	font-weight: 600;
+	font-size: 12.5px;
+	font-weight: 500;
 	color: var(--ai-fq-text);
 	transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
@@ -590,7 +760,8 @@ body.settings_page_ai-fun-questions #wpcontent {
 .ai-fq-topic__input:checked + .ai-fq-topic__chip {
 	border-color: var(--ai-fq-accent);
 	background: var(--ai-fq-accent-soft);
-	color: #1d4fd8;
+	color: var(--ai-fq-accent-ink);
+	font-weight: 600;
 }
 
 /* The check only belongs to a selected chip. */
@@ -623,9 +794,9 @@ body.settings_page_ai-fun-questions #wpcontent {
 }
 
 .ai-fq-field__description {
-	margin: 8px 0 0;
+	margin: 6px 0 0;
 	max-width: 62ch;
-	font-size: 13px;
+	font-size: 12px;
 	line-height: 1.5;
 	color: var(--ai-fq-text-muted);
 }
@@ -633,18 +804,19 @@ body.settings_page_ai-fun-questions #wpcontent {
 /* ----------------------------------------------------- Notes / shortcode */
 
 .ai-fq-card {
-	margin: 26px 0 0;
-	padding: 22px 26px 26px;
+	margin: 0 0 22px;
+	padding: 20px 22px;
 	border: 1px solid var(--ai-fq-border);
 	border-radius: var(--ai-fq-radius);
 	background: var(--ai-fq-surface);
 }
 
 .ai-fq-card__title {
-	margin: 0 0 10px;
+	margin: 0 0 4px;
 	padding: 0;
-	font-size: 14px;
-	font-weight: 700;
+	font-size: 15px;
+	font-weight: 600;
+	letter-spacing: -0.005em;
 	color: var(--ai-fq-text);
 }
 
@@ -652,12 +824,27 @@ body.settings_page_ai-fun-questions #wpcontent {
 	margin-top: 0;
 }
 
+/*
+ * wp-admin resets `ul` to list-style: none, which left the 17px indent with
+ * nothing in it — a gap in front of every line. The marker is restored
+ * explicitly rather than by dropping the indent.
+ */
 .ai-fq-notes-list {
-	margin: 0 0 22px;
-	padding-left: 20px;
+	margin: 10px 0 0;
+	padding-left: 17px;
 	max-width: 88ch;
+	list-style: disc outside;
 	color: var(--ai-fq-text-muted);
-	font-size: 13px;
+	font-size: 12.5px;
+	line-height: 1.55;
+}
+
+.ai-fq-notes-list li {
+	list-style: disc outside;
+}
+
+.ai-fq-notes-list li::marker {
+	color: var(--ai-fq-border-strong);
 }
 
 .ai-fq-notes-list li {
@@ -665,14 +852,16 @@ body.settings_page_ai-fun-questions #wpcontent {
 }
 
 .ai-fq-card__text {
-	margin: 0 0 10px;
+	margin: 0 0 16px;
+	max-width: 64ch;
 	font-size: 13px;
+	line-height: 1.5;
 	color: var(--ai-fq-text-muted);
 }
 
 .ai-fq-code {
 	display: inline-block;
-	padding: 7px 12px;
+	padding: 6px 10px;
 	border: 1px solid var(--ai-fq-border);
 	border-radius: var(--ai-fq-radius-sm);
 	background: var(--ai-fq-surface-muted);
@@ -698,7 +887,7 @@ body.settings_page_ai-fun-questions #wpcontent {
 }
 
 .ai-fq-savebar__status {
-	font-size: 13px;
+	font-size: 12.5px;
 	color: var(--ai-fq-text-muted);
 }
 
@@ -722,12 +911,12 @@ body.settings_page_ai-fun-questions #wpcontent {
 	-webkit-appearance: none;
 	-moz-appearance: none;
 	appearance: none;
-	padding: 13px 30px;
+	padding: 9px 18px;
 	border: 0;
 	border-radius: var(--ai-fq-radius-sm);
 	background: var(--ai-fq-accent);
-	font-size: 14px;
-	font-weight: 700;
+	font-size: 13px;
+	font-weight: 600;
 	line-height: 1.2;
 	color: #fff;
 	cursor: pointer;
@@ -750,6 +939,7 @@ body.settings_page_ai-fun-questions #wpcontent {
 @media screen and (max-width: 1100px) {
 	.ai-fq-form {
 		display: block;
+		padding: 22px 40px 0;
 	}
 
 	.ai-fq-form__aside {
@@ -767,8 +957,20 @@ body.settings_page_ai-fun-questions #wpcontent {
 }
 
 @media screen and (max-width: 782px) {
-	.ai-fq-admin {
-		padding: 20px;
+	.ai-fq-admin__header {
+		height: auto;
+		padding: 12px 20px;
+	}
+
+	.ai-fq-form {
+		padding: 22px 20px 0;
+	}
+
+	.ai-fq-admin > .notice,
+	.ai-fq-admin > .updated,
+	.ai-fq-admin > .error,
+	.ai-fq-note {
+		margin: 22px 20px 0;
 	}
 
 	.ai-fq-admin__title {
@@ -784,18 +986,9 @@ body.settings_page_ai-fun-questions #wpcontent {
 		grid-template-columns: 1fr;
 	}
 
-	.ai-fq-savebar {
-		position: static;
-		flex-direction: column;
-		align-items: stretch;
-		gap: 12px;
-		text-align: center;
-	}
-
 	.ai-fq-button {
-		width: 100%;
 		/* Keep the tap target comfortable on phones. */
-		min-height: 48px;
+		min-height: 40px;
 	}
 
 	/* iOS Safari zooms into fields under 16px. */
@@ -825,7 +1018,7 @@ body.settings_page_ai-fun-questions #wpcontent {
 	margin: 0;
 }
 
-.ai-fq-field__input:disabled {
+.ai-fq-admin .ai-fq-field__input:disabled {
 	background: var(--ai-fq-surface-muted);
 	color: var(--ai-fq-text-muted);
 	cursor: not-allowed;
