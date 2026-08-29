@@ -8,13 +8,16 @@ class AI_FQ_Plugin {
 
 	public static function init() {
 		AI_FQ_Rate_Limiter::init();
+		AI_FQ_Stats::init();
 		AI_FQ_Admin::init();
+		AI_FQ_Dashboard::init();
 		AI_FQ_REST_API::init();
 		AI_FQ_Frontend::init();
 	}
 
 	public static function activate() {
 		AI_FQ_Rate_Limiter::create_table();
+		AI_FQ_Stats::create_table();
 	}
 
 	public static function deactivate() {

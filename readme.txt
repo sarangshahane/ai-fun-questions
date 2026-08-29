@@ -115,7 +115,7 @@ isolated behind AI_FQ_Provider_Interface, so switching later is a contained chan
 
 == Screenshots ==
 
-1. The settings screen: choose a provider, enter its credentials, pick a model.
+1. The settings screen: questions today, spend so far, and where the shortcode appears, above the provider chooser.
 2. Question topics: pick the subjects questions are generated from, or leave it on Random.
 3. The widget on the front end, before the visitor answers.
 4. The widget after answering, with the punchline revealed.

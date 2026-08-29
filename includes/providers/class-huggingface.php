@@ -6,6 +6,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class AI_FQ_HuggingFace_Provider implements AI_FQ_Provider_Interface {
 
+	/**
+	 * The router this provider posts to.
+	 *
+	 * A constant rather than a literal in the call below so the settings
+	 * screen's transport check can read the same value the request uses. It
+	 * had its own copy of this string, which meant the check could pass while
+	 * the provider talked to something else.
+	 */
+	const ENDPOINT = 'https://router.huggingface.co/v1/chat/completions';
+
 	public function generate_question() {
 		$token = defined( 'AI_FQ_HF_TOKEN' ) ? trim( AI_FQ_HF_TOKEN ) : trim( get_option( 'ai_fq_hf_token', '' ) );
 		$model = trim( get_option( 'ai_fq_hf_model', 'Qwen/Qwen3-4B-Instruct-2507' ) );
@@ -23,7 +33,7 @@ class AI_FQ_HuggingFace_Provider implements AI_FQ_Provider_Interface {
 		 * a 302 would follow into private address space.
 		 */
 		$response = wp_safe_remote_post(
-			'https://router.huggingface.co/v1/chat/completions',
+			self::ENDPOINT,
 			array(
 				'timeout'     => 30,
 				'redirection' => 2,
@@ -51,7 +61,11 @@ class AI_FQ_HuggingFace_Provider implements AI_FQ_Provider_Interface {
 		}
 
 		return AI_FQ_Question_Generator::normalize_response(
-			$data['choices'][0]['message']['content']
+			$data['choices'][0]['message']['content'],
+			array(
+				'in'  => isset( $data['usage']['prompt_tokens'] ) ? (int) $data['usage']['prompt_tokens'] : 0,
+				'out' => isset( $data['usage']['completion_tokens'] ) ? (int) $data['usage']['completion_tokens'] : 0,
+			)
 		);
 	}
 

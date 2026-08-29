@@ -51,7 +51,16 @@ class AI_FQ_Ollama_Provider implements AI_FQ_Provider_Interface {
 			return self::public_error();
 		}
 
-		return AI_FQ_Question_Generator::normalize_response( $body['message']['content'] );
+		/*
+		 * Ollama reports token counts under its own names, not OpenAI's.
+		 */
+		return AI_FQ_Question_Generator::normalize_response(
+			$body['message']['content'],
+			array(
+				'in'  => isset( $body['prompt_eval_count'] ) ? (int) $body['prompt_eval_count'] : 0,
+				'out' => isset( $body['eval_count'] ) ? (int) $body['eval_count'] : 0,
+			)
+		);
 	}
 
 	private static function allowed_url( $url ) {

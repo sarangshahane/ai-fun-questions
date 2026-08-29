@@ -29,6 +29,11 @@ function ai_fq_uninstall_site() {
 		'ai_fq_openai_endpoint',
 		'ai_fq_openai_key',
 		'ai_fq_openai_model',
+		'ai_fq_openai_price_in',
+		'ai_fq_openai_price_out',
+		'ai_fq_hf_price_in',
+		'ai_fq_hf_price_out',
+		'ai_fq_stats_db_version',
 	);
 
 	foreach ( $options as $option ) {
@@ -49,9 +54,14 @@ function ai_fq_uninstall_site() {
 		)
 	);
 
-	// The rate-limit table holds nothing but short-lived counters.
+	// Both tables hold nothing but counters — no question or visitor data.
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Removing the plugin's own table on uninstall.
 	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $wpdb->prefix . 'ai_fq_rate_limits' ) );
+
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Removing the plugin's own table on uninstall.
+	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $wpdb->prefix . 'ai_fq_stats' ) );
+
+	delete_transient( 'ai_fq_shortcode_locations' );
 
 	wp_clear_scheduled_hook( 'ai_fq_cleanup_rate_limits' );
 }

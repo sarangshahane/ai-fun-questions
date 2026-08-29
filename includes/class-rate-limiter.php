@@ -130,6 +130,53 @@ class AI_FQ_Rate_Limiter {
 	}
 
 	/**
+	 * The sliding estimate for a bucket, without charging it.
+	 *
+	 * `allow()` cannot be reused for this: calling it would spend one of the
+	 * allowance it is being asked to report on. Read-only, and it shares the
+	 * exact window arithmetic above so the number the dashboard shows is the
+	 * number the limiter would decide on.
+	 *
+	 * @param string $bucket Bucket key to read.
+	 * @return int Requests counted against the current window, rounded up.
+	 */
+	public static function used( $bucket ) {
+		global $wpdb;
+
+		$table = self::table_name();
+		$now   = time();
+		$start = $now - ( $now % self::WINDOW );
+		$key   = hash_hmac( 'sha256', (string) $bucket, wp_salt( 'auth' ) );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Reads the live limiter state for the admin dashboard; a cached value would be stale by definition.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT window_start, request_count FROM %i WHERE bucket_key = %s AND window_start IN (%d, %d)',
+				$table,
+				$key,
+				$start,
+				$start - self::WINDOW
+			),
+			ARRAY_A
+		);
+
+		$current  = 0;
+		$previous = 0;
+
+		foreach ( (array) $rows as $row ) {
+			if ( (int) $row['window_start'] === $start ) {
+				$current = (int) $row['request_count'];
+			} else {
+				$previous = (int) $row['request_count'];
+			}
+		}
+
+		$carry = ( self::WINDOW - ( $now - $start ) ) / self::WINDOW;
+
+		return (int) ceil( $current + ( $previous * $carry ) );
+	}
+
+	/**
 	 * Requests allowed per bucket per window.
 	 *
 	 * A page may hold several widgets, each firing its own generation request,
