@@ -1,6 +1,6 @@
 # AI Fun Questions
 
-AI-powered WordPress widget that generates a fresh technology joke/riddle on demand.
+AI-powered WordPress widget that generates a fresh joke/riddle on demand, on whatever subjects you choose.
 
 No question bank is ever stored. Every question is generated live by the AI provider you configure, held briefly in a transient, and discarded.
 
@@ -105,6 +105,23 @@ Requests go to `https://router.huggingface.co/v1/chat/completions`. Use a model 
 | Model | `ai_fq_openai_model` | `gpt-4o-mini` |
 
 > **Note:** this provider validates the endpoint with `wp_http_validate_url()`, which rejects loopback and private addresses. It therefore cannot currently point at a local LLM server such as LM Studio, llama.cpp, or LocalAI. Use the Ollama provider for local models.
+
+### Question topics
+
+| Setting | Option | Default |
+| --- | --- | --- |
+| Topics | `ai_fq_topics` | `['random']` |
+
+Which subjects questions are generated about. Topics are grouped — Technology plus
+Everyday life, Food and drink, Animals, Work and office, Travel and places, and
+Sport and hobbies — because most WordPress sites are not tech sites. With topics
+selected, one is drawn at random per request from that set.
+
+The `random` sentinel is not "one of the listed topics": it removes the subject
+constraint entirely, so the model picks its own, including subjects the catalogue
+does not list. It takes precedence over any individual topic saved alongside it, and
+an empty selection collapses to it. Extend or replace the catalogue with the
+`ai_fq_topic_groups` filter.
 
 ---
 

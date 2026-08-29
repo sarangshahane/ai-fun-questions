@@ -372,7 +372,7 @@
          "id": "1a2b00d",
          "elType": "widget",
          "settings": {
-          "editor": "A tiny widget that asks an AI for one fresh tech riddle, right when a visitor wants one. There is no joke database to run dry &mdash; every question is written on the spot, held for ten minutes, then thrown away.",
+          "editor": "A tiny widget that asks an AI for one fresh riddle, right when a visitor wants one. There is no joke database to run dry &mdash; every question is written on the spot, held for ten minutes, then thrown away.",
           "text_color": "#4B5563",
           "typography_typography": "custom",
           "typography_font_family": "Public Sans",
@@ -2067,7 +2067,7 @@
            "library": "fa-solid"
           },
           "title_text": "A blog sidebar",
-          "description_text": "A recurring bit of personality on a long-form tech blog, without another content chore.",
+          "description_text": "A recurring bit of personality on a long-form blog, without another content chore.",
           "position": "top",
           "title_size": "h3",
           "primary_color": "#E4922B",

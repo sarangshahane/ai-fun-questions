@@ -432,6 +432,188 @@ body.settings_page_ai-fun-questions #wpcontent {
 	outline: 0;
 }
 
+/* ------------------------------------------------------------ Topic chips */
+
+.ai-fq-topics {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+/* Visually hidden but focusable, so the group keeps real checkbox semantics. */
+.ai-fq-topic__input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	opacity: 0;
+	pointer-events: none;
+}
+
+/* Random reads as a row above the chips, not as another chip. */
+.ai-fq-topic-random {
+	display: block;
+	margin-bottom: 16px;
+	cursor: pointer;
+}
+
+.ai-fq-topic-random__row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 13px 16px;
+	border: 1.5px solid var(--ai-fq-border);
+	border-radius: var(--ai-fq-radius);
+	background: var(--ai-fq-surface);
+	transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.ai-fq-topic-random:hover .ai-fq-topic-random__row {
+	border-color: var(--ai-fq-border-strong);
+}
+
+.ai-fq-topic__input:checked + .ai-fq-topic-random__row {
+	border-color: var(--ai-fq-accent);
+	background: var(--ai-fq-accent-soft);
+}
+
+.ai-fq-topic__input:focus-visible + .ai-fq-topic-random__row,
+.ai-fq-topic__input:focus-visible + .ai-fq-topic__chip {
+	outline: 2px solid var(--ai-fq-accent);
+	outline-offset: 3px;
+}
+
+/* Same circular mark as the provider cards. */
+.ai-fq-topic-random__mark {
+	position: relative;
+	flex: none;
+	width: 20px;
+	height: 20px;
+	border: 1.5px solid var(--ai-fq-border-strong);
+	border-radius: 50%;
+	background: var(--ai-fq-surface);
+	transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.ai-fq-topic__input:checked + .ai-fq-topic-random__row .ai-fq-topic-random__mark {
+	border-color: var(--ai-fq-accent);
+	background: var(--ai-fq-accent);
+}
+
+.ai-fq-topic-random__mark::after {
+	content: "";
+	position: absolute;
+	top: 4px;
+	left: 6px;
+	width: 5px;
+	height: 9px;
+	border: solid #fff;
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg) scale(0.4);
+	opacity: 0;
+	transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.ai-fq-topic__input:checked + .ai-fq-topic-random__row .ai-fq-topic-random__mark::after {
+	opacity: 1;
+	transform: rotate(45deg) scale(1);
+}
+
+.ai-fq-topic-random__text {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+}
+
+.ai-fq-topic-random__name {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--ai-fq-text);
+}
+
+.ai-fq-topic-random__hint {
+	font-size: 12.5px;
+	color: var(--ai-fq-text-muted);
+}
+
+/* Groups stack; chips wrap inside each one. */
+.ai-fq-topics__groups {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	transition: opacity 0.15s ease;
+}
+
+.ai-fq-topics__group-label {
+	display: block;
+	margin-bottom: 9px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.09em;
+	text-transform: uppercase;
+	color: var(--ai-fq-text-muted);
+}
+
+/* The chips themselves. */
+.ai-fq-topics__grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 9px;
+}
+
+.ai-fq-topic {
+	display: block;
+	position: relative;
+	cursor: pointer;
+}
+
+.ai-fq-topic__chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	padding: 8px 14px;
+	border: 1.5px solid var(--ai-fq-border);
+	border-radius: 999px;
+	background: var(--ai-fq-surface);
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--ai-fq-text);
+	transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.ai-fq-topic:hover .ai-fq-topic__chip {
+	border-color: var(--ai-fq-border-strong);
+}
+
+.ai-fq-topic__input:checked + .ai-fq-topic__chip {
+	border-color: var(--ai-fq-accent);
+	background: var(--ai-fq-accent-soft);
+	color: #1d4fd8;
+}
+
+/* The check only belongs to a selected chip. */
+.ai-fq-topic__chip .ai-fq-icon {
+	display: none;
+	width: 13px;
+	height: 13px;
+	stroke-width: 3;
+}
+
+.ai-fq-topic__input:checked + .ai-fq-topic__chip .ai-fq-icon {
+	display: block;
+}
+
+/*
+ * Random overrides the individual topics server-side, so park them rather
+ * than hiding them: the selection stays readable while it is being ignored.
+ * :has() is progressive — without it the chips simply do not dim.
+ */
+.ai-fq-topics:has( [data-ai-fq-topic-random]:checked ) .ai-fq-topics__groups {
+	opacity: 0.4;
+}
+
 .ai-fq-field__custom {
 	margin-top: 9px;
 }

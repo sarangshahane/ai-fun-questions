@@ -52,6 +52,27 @@ Single initialization point for admin, REST API, and frontend components.
 
 Owns the shared AI prompt, provider selection, JSON normalization, length validation, and category normalization.
 
+Also owns the topic catalogue the prompt rotates through. `topic_groups()` returns
+labelled groups — Technology plus general-purpose ones — each mapping a stable slug
+to the English phrase dropped into the prompt; `topics()` flattens them. The slug is
+what the `ai_fq_topics` option stores, so slugs must not change once sites have
+saved a selection.
+
+Technology is one group among several by design: most WordPress sites are not tech
+sites. Two things follow from that and are easy to break. The system prompt names no
+subject domain — it defers to the subject in the user turn — and every entry in
+`ANGLES` is domain-neutral; three angles used to name software and error messages,
+which dragged technology into jokes about cats and baking. A category the model
+reports that is not in the allowed list falls back to `general`, not `technology`.
+
+`active_topics()` resolves the option down to the topics actually in
+play, and returns an EMPTY array for Random. Empty is meaningful rather than an
+error: the prompt then asks the model to choose its own subject instead of naming
+one, which is what lets Random reach subjects the catalogue does not list. Every
+unusable state — missing option, corrupt value, slugs that have drifted out of the
+catalogue — resolves there too, so a site with a broken selection keeps generating
+rather than stopping.
+
 ### `includes/providers/`
 
 Provider adapters implement `AI_FQ_Provider_Interface`.

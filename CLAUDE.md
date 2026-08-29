@@ -2,7 +2,7 @@
 
 ## Project
 
-AI Fun Questions is a modular WordPress plugin that generates fresh technology jokes using configurable AI providers.
+AI Fun Questions is a modular WordPress plugin that generates fresh jokes using configurable AI providers. Subjects are configurable and are not limited to technology.
 
 ## Important principles
 
