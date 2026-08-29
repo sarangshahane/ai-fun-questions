@@ -11,30 +11,33 @@ class AI_FQ_Question_Generator {
 	const MAX_CATEGORY_LENGTH = 40;
 	const MAX_HINT_LENGTH     = 200;
 
-	const PROMPT = <<<'PROMPT'
-You are a witty joke generator.
-
-Generate exactly ONE original funny question about the subject named in the next message.
-
-Requirements:
-- The joke must be family-friendly.
-- It should sound like a short conversational riddle.
-- The punchline should contain clever wordplay.
-- Do not reuse famous jokes.
-- Keep the question under 35 words.
-- Keep the answer under 12 words.
-- Keep the hint under 20 words.
-- Return ONLY valid JSON.
-
-JSON format:
-
-{
-  "question": "",
-  "answer": "",
-  "category": "",
-  "hint": ""
-}
-PROMPT;
+	/*
+	 * Concatenated rather than a NOWDOC: the review team prohibits HEREDOC and
+	 * NOWDOC because code sniffers cannot see escaping inside them.
+	 */
+	const PROMPT =
+		  'You are a witty joke generator.' . "\n"
+		. '' . "\n"
+		. 'Generate exactly ONE original funny question about the subject named in the next message.' . "\n"
+		. '' . "\n"
+		. 'Requirements:' . "\n"
+		. '- The joke must be family-friendly.' . "\n"
+		. '- It should sound like a short conversational riddle.' . "\n"
+		. '- The punchline should contain clever wordplay.' . "\n"
+		. '- Do not reuse famous jokes.' . "\n"
+		. '- Keep the question under 35 words.' . "\n"
+		. '- Keep the answer under 12 words.' . "\n"
+		. '- Keep the hint under 20 words.' . "\n"
+		. '- Return ONLY valid JSON.' . "\n"
+		. '' . "\n"
+		. 'JSON format:' . "\n"
+		. '' . "\n"
+		. '{' . "\n"
+		. '  "question": "",' . "\n"
+		. '  "answer": "",' . "\n"
+		. '  "category": "",' . "\n"
+		. '  "hint": ""' . "\n"
+		. '}';
 
 	public static function generate() {
 		$provider_name = get_option( 'ai_fq_provider', 'ollama' );

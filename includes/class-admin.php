@@ -74,7 +74,7 @@ class AI_FQ_Admin {
 			'ai_fq_ollama_model'    => array( __CLASS__, 'sanitize_ollama_model' ),
 			'ai_fq_hf_token'        => array( __CLASS__, 'sanitize_hf_token' ),
 			'ai_fq_hf_model'        => array( __CLASS__, 'sanitize_hf_model' ),
-			'ai_fq_openai_endpoint' => array( __CLASS__, 'sanitize_url_field' ),
+			'ai_fq_openai_endpoint' => array( __CLASS__, 'sanitize_openai_endpoint' ),
 			'ai_fq_openai_key'      => array( __CLASS__, 'sanitize_openai_key' ),
 			'ai_fq_openai_model'    => array( __CLASS__, 'sanitize_openai_model' ),
 		);
@@ -224,6 +224,36 @@ class AI_FQ_Admin {
 
 	public static function sanitize_url_field( $value ) {
 		return esc_url_raw( trim( (string) $value ) );
+	}
+
+	/**
+	 * The OpenAI-compatible endpoint carries the API key in an Authorization
+	 * header, so it may not be plain http — that would put the key on the wire
+	 * in clear. A rejected value leaves the stored one alone rather than
+	 * blanking the field.
+	 *
+	 * @param string $value Submitted endpoint.
+	 * @return string
+	 */
+	public static function sanitize_openai_endpoint( $value ) {
+		$value = esc_url_raw( trim( (string) $value ) );
+
+		if ( '' === $value ) {
+			return $value;
+		}
+
+		if ( 'https' !== wp_parse_url( $value, PHP_URL_SCHEME ) ) {
+			add_settings_error(
+				'ai_fq_openai_endpoint',
+				'ai_fq_endpoint_scheme',
+				__( 'The OpenAI-compatible endpoint must start with https:// — the API key is sent with every request.', 'ai-fun-questions' ),
+				'error'
+			);
+
+			return (string) get_option( 'ai_fq_openai_endpoint', '' );
+		}
+
+		return $value;
 	}
 
 	public static function sanitize_hf_token( $value ) {

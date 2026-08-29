@@ -17,7 +17,12 @@ class AI_FQ_HuggingFace_Provider implements AI_FQ_Provider_Interface {
 			);
 		}
 
-		$response = wp_remote_post(
+		/*
+		 * wp_safe_remote_post() sets reject_unsafe_urls, which validates the
+		 * target on every redirect hop. wp_remote_post() validates nothing, so
+		 * a 302 would follow into private address space.
+		 */
+		$response = wp_safe_remote_post(
 			'https://router.huggingface.co/v1/chat/completions',
 			array(
 				'timeout'     => 30,
@@ -58,8 +63,15 @@ class AI_FQ_HuggingFace_Provider implements AI_FQ_Provider_Interface {
 	}
 
 	private static function log_error( $message ) {
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			error_log( '[AI Fun Questions] ' . wp_strip_all_tags( $message ) );
+		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG || ! defined( 'WP_DEBUG_LOG' ) || ! WP_DEBUG_LOG ) {
+			return;
 		}
+
+		/*
+		 * Provider failures are never shown to visitors, so the reason has to
+		 * go somewhere a site owner can find it. Debug builds only.
+		 */
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Diagnostics behind WP_DEBUG_LOG.
+		error_log( '[AI Fun Questions] ' . wp_strip_all_tags( $message ) );
 	}
 }
